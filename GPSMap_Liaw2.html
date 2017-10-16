@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GPS Route</title>
+		<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+		<script src="https://rawgithub.com/CryMasK/furry-robot/master/random-color.js">// dor random color for polyline</script>
+		<style type="text/css">
+			html,
+			body {
+			  height: 100%;
+			  margin: 0px;
+			  padding: 0px
+			}
+			
+			thead {
+				font-size: 95%;
+			}
+			
+			tbody:hover {
+				outline: hsla(186, 93%, 50%, 0.9) ridge;
+			}
+			
+			tbody:hover:active {
+				box-shadow: 0 1px 1px hsla(211,79%,6%,.1) inset,
+							0 0 1px hsla(211,79%,6%,.2) inset;
+			}
+			
+			#menu-hamburger-container {
+				height: 48px;
+				width: 48px;
+				margin: 6px 10px 0px 0px; /* special in Route page */
+				position: absolute;
+				float: left;
+				background: rgba(255, 255, 255, 0.85); /* special in Route page */
+				cursor: pointer;
+				overflow: hidden;
+				z-index: 87;
+				-webkit-box-shadow: 1px 5px 17px 0px rgba(0, 0, 0, 0.8);
+			}
+			
+			#menu-hamburger-image {
+				position: relative;
+				left: 0px; /* special in Route page */
+			}
+			
+			.gm-style-mtc {
+				position: relative;
+				left: 50px !important; /* over write */
+			}
+			
+			.controls {
+			  margin-top: 10px;
+			  border: 1px solid transparent;
+			  border-radius: 2px 0 0 2px;
+			  box-sizing: border-box;
+			  -moz-box-sizing: border-box;
+			  height: 32px;
+			  outline: none;
+			  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+			}
+			
+			#pac-input {
+				position: absolute; 
+				top: 10px; 
+				left: 168px !important; /* over write */
+				z-index: 99;
+			  background-color: #fff;
+			  font-family: Roboto;
+			  font-size: 15px;
+			  font-weight: 300;
+			  margin-left: 12px;
+			  padding: 0 11px 0 13px;
+			  text-overflow: ellipsis;
+			  width: 300px;
+			}
+
+			#pac-input:focus {
+			  border-color: #4d90fe;
+			}
+
+			.pac-container {
+			  font-family: Roboto;
+			}
+
+			#type-selector {
+			  color: #fff;
+			  background-color: #4d90fe;
+			  padding: 5px 11px 0px 11px;
+			}
+
+			#type-selector label {
+			  font-family: Roboto;
+			  font-size: 13px;
+			  font-weight: 300;
+			}
+		
+			#map-canvas {
+				flex: 1;
+				height: auto;
+				max-width: 75%;
+				margin: 0px;
+			}
+			
+			#rank-route {
+				background-color: rgb(245, 250, 240);
+				height: auto;
+				max-width: 25%;
+				padding-top: 3%;
+				padding-left: 1%;
+				line-height: 160%;
+				font-size: 120%;
+			}
+			
+			.message-button {
+				max-height: 24px; 
+				vertical-align: middle;
+				cursor: pointer;
+			}
+			
+			.message-box {
+				position: absolute;
+				background-color: rgba(255, 255, 255, 0.75);
+				padding: 0px 5px 5px 5px;
+				z-index: 90;
+			}
+			
+			.message-box-input {
+				width: 250px;
+				height: 130px;
+			}
+			
+			.message-box-notify {
+				color: red;
+				font-size: 16px;
+				line-height: 0.2; /* (16px * 0.2) */
+			}
+			
+			.cancel-button {
+				font-size: 16px !important; 
+				padding: 5px 10px 5px 10px !important;
+			}
+			
+			.send-message-button {
+				font-size: 16px !important;
+				padding: 5px 10px 5px 10px !important;
+			}
+			
+			#cleanMap {
+				z-index:87;
+				position: absolute;
+				right: 0;
+				bottom: 0;
+				overflow: hidden;
+				max-width: 250px;
+				max-height: 230px;
+			}
+			
+			#doge-footprint-image {
+				cursor: pointer;
+				transform: rotate(330deg) translate(30px,70px);
+				width: 100%;
+			}
+			
+			/*#doge-footprint-image:hover {
+				transform: rotate(330deg) translate(10px,20px);
+				width: 100%;
+			}*/
+			
+			#content {
+				display: flex;
+				height: 100%;
+				width: 100%;
+			}
+			
+			#cat-paw {
+				display: none;
+				z-index: 87;
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 75%;
+				height: 100%;
+				overflow: hidden;
+				
+				/*visibility: hidden;*/
+				/*opacity: 0;*/
+				/*transition: all 500ms;*/
+				/*-moz-transition: all 500ms;*/ /* Firefox 4 */
+				/*-webkit-transition: all 500ms;*/ /* Safari and Chrome */
+				/*-o-transition: all 500ms;*/ /* Opera */
+			}
+			
+			#cat-paw-image {
+				transform: translate(900px,700px);
+				/*transition-property: transform;*/
+				/*transition-duration: 10ms;*/
+			}
+			
+			/*#cleanMap:hover:active + #cat-paw {
+				opacity: 1;
+				visibility: visible;
+			}*/
+			
+			.cat {
+				animation-name: punch;
+				animation-duration: 1500ms;
+				animation-timing-function: ease-in;
+				animation-iteration-count: 1;
+				/*animation-fill-mode: none;*/
+			}
+			
+			@keyframes punch {
+				0% {
+					/*z-index: 87;*/
+					/*visibility: visible;*/
+					transform: translate(900px, 700px);
+				}
+				90% {
+					transform: translate(550px, 350px);
+				}
+				100%{
+					transform: translate(650px, 500px);
+				}
+				/*100%{
+					z-index: -1;
+					visibility: hidden;
+					transform: translate(900px, 700px);
+				}*/
+			}
+			
+			#icon-sidenav-shim {
+				display: none;
+				position:fixed;
+				height: 100%;
+				width: 100%;
+				top: 0;
+				left: 0;
+				background: black;
+				opacity: 0;
+				z-index: 88;
+				transition-property: opacity;
+				transition-duration: 0.3s;
+			}
+			
+			.icon-sidenav {
+				height: 100%;
+				width: 0; /* transition to 300px */
+				position: fixed;
+				z-index: 89;
+				top: 0;
+				left: 0;
+				text-align: center;
+				background-color: rgba(5, 5, 5, 0.9);
+				overflow-x: hidden;
+				transition: 0.5s;
+				padding-top: 60px;
+			}
+			
+			.icon-sidenav .closebtn {
+				display: block;
+				position: absolute;
+				top: 0;
+				right: 20px;
+				margin-top: 14px; /* one block 62px = 48px(img) + 14px */
+				margin-left: 50px;
+				max-height: 48px;
+				cursor: pointer;
+				
+				/*text-decoration: none;
+				font-size: 25px;
+				color: white;*/
+			}
+
+			.icon-sidenav a {
+				display: block;
+				padding: 16px;
+				text-decoration: none;
+				font-size: 25px;
+				color: white;
+				transition: all 0.3s ease;
+				z-index: 87;
+			}
+
+			.icon-sidenav a:hover/*, .offcanvas a:focus*/{
+				background-color: #000;
+				/* color: #f1f1f1; */
+			}
+			
+			.icon-sidenav a:focus {
+				background-color: #4CAF50 !important;
+			}
+			
+			.icon-sidenav-active {
+				background: url("src/now_pointer_inverted.png") no-repeat -50px;
+				background-size: contain;
+			}
+
+			@media screen and (max-height: 450px) {
+			  .icon-sidenav {padding-top: 15px;}
+			  .icon-sidenav a {font-size: 18px;}
+			}
+		</style>
+	</head>
+	<body>
+		<script
+		  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRVE_uo1_J0B0B0HXfPT1bQvZ34EQZ_-w&libraries=geometry,places">
+		  // Cancel "async defer" & "callback" function 
+		</script>
+		<script src="js/jquery-3.1.1.min.js">// for query MySQL</script>
+		
+		<!--beautiful button -->
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+		<!--link rel="stylesheet" href="/resources/demos/style.css"-->
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+		<!--animating marker library-->
+		<!-- jquery library and jquery.easing plugin are needed -->
+		<!--script src="js/jquery-3.1.1.min.js"></script-->
+		<script src="js/jquery.easing.1.3.js"></script>
+		
+		<!-- we use markerAnimate to actually animate marker -->
+		<script src="js/markerAnimate.js"></script>
+		
+		<!-- SlidingMarker hides details from you - your markers are just animated automagically -->
+		<script src="js/SlidingMarker.min.js"></script>
+		<!--library import end-->
+		<div id="menu-hamburger-container" onclick="openNav()">
+				<img id="menu-hamburger-image" src="src/quantum_menu-v2-2x.png">
+		</div>
+		<div id="content">		
+			<input id="pac-input" class="controls" type="text" placeholder="Search Box">		
+			<div id="map-canvas"></div>
+			<div id="rank-route">
+				<table id="rank-table" frame="box" style="table-layout: fixed; width: 95%;">
+					<thead>
+						<th style="width: 3%;">排名</th>
+						<th style="width: 6%;">ID</th>
+						<th style="width: 5%;">距離 <a id="distanceSortOption" onclick="sortTable(0)" style="cursor: pointer;">▼</a></th>
+						<th style="width: 6%; font-size: 87%;">估計時間 <a id="durationSortOption" onClick="sortTable(1)" style="font-size: 114%; cursor: pointer;">▲</a></th>
+						<th style="width: 4%;">狀態</th>
+						<th style="width: 3%;">通訊</th>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+			<div id="cleanMap"><img id="doge-footprint-image" src="src/doge_footprint.png" alt="清除地圖" title="點我回復Map" onClick="cleanMap()"></div>
+			<div id="cat-paw"><img id="cat-paw-image" src="src/cat_paw.png"></div>
+		</div>
+		<div id="icon-sidenav-shim" onclick="closeNav()"></div>
+		<div id="icon-sidenav-pane" class="icon-sidenav">
+			<div class="closebtn" onclick="closeNav()"><img src="src/settings_hdpi-back-default.png" alt="&#x95DC;&#x9589;"></img></div>
+			<a class="icon-sidenav-active" href="http://140.136.150.80/project_D/GPSmap_Liaw2.html">Route</a>
+			<a href="http://140.136.150.80/project_D/GPSmap_Liaw3.html">Log</a>
+		</div>
+		<script type="text/javascript">
+			var map;
+			var directionsService;
+			var rendererOptions = { // directionsDisplay option
+				//draggable: true,
+				suppressMarkers: true,
+				//suppressPolylines: true
+			}
+			
+			var markerDestination;
+			
+			var markers = [], // Array of marker
+				//searchResult = []; // Array for original searchBox
+				lastRouteRecord; // 用來記錄顯示出來的導航路線
+			
+			//var queryTimes = -1; // query counter, use to Identify the id of marker, line, ... 
+			
+			//var markerA,markerB,markerC,markerD,markerE; // for test
+			
+			/* use to limit click speed. */
+			var clickEnable = true,
+				clickEnableTimeout = 800,
+				clickEnableTimeoutID;
+			/* cleanMap animate option */
+			var catPawTimeoutID,
+				cleanMapTimeoutID;
+			/* message option */
+			var isMsgBoxOpen = false;
+			var scanNoGetRouteTimes = 0; // scanMap 容忍程度
+			var routeCount; // use to check all route requests are complete.
+			var sortFlipflop = 0; // 0: sort by distance	1: sort by duration
+			
+			function initMap(){				
+				var initCenter = new google.maps.LatLng(25.066423, 121.5049297); // 捷運台北橋站
+				var myOptions = { // map's argumernts
+					zoom: 13,
+					center: initCenter, // event ocurred site
+					mapTypeId: google.maps.MapTypeId.ROADMAP, // map shows road
+					styles: [
+					  {
+						"featureType": "administrative",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"color": "#ff8000"
+						  }
+						]
+					  },
+					  {
+						"featureType": "administrative",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"color": "#a8a8a8"
+						  },
+						  {
+							"lightness": -70
+						  }
+						]
+					  },
+					  {
+						"featureType": "landscape.man_made",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#101212"
+						  }
+						]
+					  },
+					  {
+						"featureType": "landscape.natural",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#152222"
+						  }
+						]
+					  },
+					  {
+						"featureType": "poi",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#364242"
+						  }
+						]
+					  },
+					  {
+						"featureType": "poi",
+						"elementType": "geometry.stroke",
+						"stylers": [
+						  {
+							"color": "#c0c0c0"
+						  }
+						]
+					  },
+					  {
+						"featureType": "poi",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"saturation": 25
+						  },
+						  {
+							"lightness": 25
+						  }
+						]
+					  },
+					  {
+						"featureType": "poi",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"lightness": -95
+						  }
+						]
+					  },
+					  {
+						"featureType": "road",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#1a8660"
+						  },
+						  {
+							"saturation": -45
+						  }
+						]
+					  },
+					  {
+						"featureType": "road",
+						"elementType": "geometry.stroke",
+						"stylers": [
+						  {
+							"color": "#30d69b"
+						  },
+						  {
+							"lightness": -100
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.arterial",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"color": "#808080"
+						  },
+						  {
+							"lightness": 10
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.arterial",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"color": "#000000"
+						  },
+						  {
+							"lightness": 10
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.highway",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"lightness": 5
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.highway",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"color": "#a8a8a8"
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.local",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"color": "#808080"
+						  },
+						  {
+							"lightness": 10
+						  }
+						]
+					  },
+					  {
+						"featureType": "road.local",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"color": "#000000"
+						  },
+						  {
+							"lightness": 10
+						  }
+						]
+					  },
+					  {
+						"featureType": "transit",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#111717"
+						  },
+						  {
+							"saturation": 25
+						  }
+						]
+					  },
+					  {
+						"featureType": "transit.station.rail",
+						"elementType": "labels.text.fill",
+						"stylers": [
+						  {
+							"color": "#1adcec"
+						  },
+						  {
+							"saturation": 10
+						  }
+						]
+					  },
+					  {
+						"featureType": "transit.station.rail",
+						"elementType": "labels.text.stroke",
+						"stylers": [
+						  {
+							"color": "#c0c0c0"
+						  },
+						  {
+							"lightness": -80
+						  }
+						]
+					  },
+					  {
+						"featureType": "water",
+						"elementType": "geometry.fill",
+						"stylers": [
+						  {
+							"color": "#304472"
+						  }
+						]
+					  },
+					  {
+						"featureType": "water",
+						"elementType": "geometry.stroke",
+						"stylers": [
+						  {
+							"color": "#8080c0"
+						  }
+						]
+					  }
+					]
+				};
+					
+				map = new google.maps.Map(document.getElementById("map-canvas"), myOptions); // create a map
+				
+				// auto-resize map by window
+				$(window).resize(function() { 
+					var center = map.getCenter();
+					google.maps.event.trigger(map, "resize");
+					map.setCenter(center); 
+				});
+				
+				directionsService = new google.maps.DirectionsService; /* must load before the document has finished load.(use callback parameter) */
+				//directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+				
+				//directionsDisplay.setMap(map);
+				
+				/* test data 
+				markerA = new google.maps.Marker({
+					position: new google.maps.LatLng(25.03539404, 121.43164883),
+					title: "A",
+					label: "A",
+					map: map
+				}),
+				markerB = new google.maps.Marker({
+					position: new google.maps.LatLng(25.04603782, 121.51385345),
+					title: "B",
+					label: "B",
+					map: map
+				});
+				markerC = new google.maps.Marker({
+					position: new google.maps.LatLng(25.0818817, 121.5004504),
+					title: "C",
+					label: "C",
+					map: map
+				});
+				markerD = new google.maps.Marker({
+					position: new google.maps.LatLng(25.0641633, 121.5249647),
+					title: "D",
+					label: "D",
+					map: map
+				});
+				markerE = new google.maps.Marker({
+					position: new google.maps.LatLng(25.0339879, 121.5646697),
+					title: "E",
+					label: 'E',
+					map: map
+				});
+				markerA.setValues({id: "markerA", directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions), routeDistance: 0, routeDuration: 0, state: "正常"});
+				markerB.setValues({id: "markerB", directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions), routeDistance: 0, routeDuration: 0, state: "正常"});
+				markerC.setValues({id: "markerC", directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions), routeDistance: 0, routeDuration: 0, state: "正常"});
+				markerD.setValues({id: "markerD", directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions), routeDistance: 0, routeDuration: 0, state: "正常"});
+				markerE.setValues({id: "markerE", directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions), routeDistance: 0, routeDuration: 0, state: "正常"});
+				markers.push(markerA);
+				markers.push(markerB);
+				markers.push(markerC);
+				markers.push(markerD);
+				markers.push(markerE);
+				/* test data */
+				
+				
+				google.maps.event.addListener(map, 'click', function(event) {
+					// Limit Click(request) Speed
+					if (clickEnable){
+						clickEnable = false;
+						setTimeout('clickEnable = true;', clickEnableTimeout); // 限制每幾秒能設定目的地一次，避免google api丟error
+						
+						clearTimeout(clickEnableTimeoutID); // 清除前次的限制秒數倒數
+						clickEnableTimeoutID = setTimeout('clickEnableTimeout = 800;', clickEnableTimeout + 3000); // 當限制秒數到了（倒數時間到），而且沒有再次累增秒數，重設秒數
+																												   // (= 等待3秒後，clickEnableTimeout開始衰退)。避免clickEnableTimeout停在那裡，不會隨著時間衰減
+						clickEnableTimeout += 3000;
+						
+						if (clickEnableTimeout > 7000){ // 當限制秒數累增超過7000 ms時，重設秒數
+							clickEnableTimeout = 800; 
+						}
+					}
+					else{
+						alert("請稍待地圖API冷卻，再重新設定目的地點！");
+						return;
+					}
+				
+					/* 新增新的目的地 */
+					setDestination(event.latLng);
+					
+					if (lastRouteRecord != undefined){ // check whether lastRouteRecord is used or not.
+						lastRouteRecord.setMap(null); // clean last route
+					}
+					
+					//routeDistance.length = 0; 清除陣列的方法之一clear routeDistance Array.
+					routeCount = 0; 			
+					for (var i=0; i<markers.length; i++){
+						calculateAndDisplayRoute(markers[i], markerDestination, function(){ // callback function
+							routeCount ++;
+							if (routeCount == markers.length){ // check all data were stored.
+								if (sortFlipflop){
+									markers.sort(compareDuration); // sort marker by duration.
+								}
+								else{
+									markers.sort(compareDistance); // sort marker by distance.
+								}
+								displaySortedResult(); // show results
+							}
+						});
+						//directionsDisplay.directions.routes[0].legs[0].distance.value;
+					}
+				});
+				
+				// Create the search box and link it to the UI element.
+				var input = document.getElementById('pac-input');
+				var searchBox = new google.maps.places.SearchBox(input);
+				map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+				// Bias the SearchBox results towards current map's viewport.
+				map.addListener('bounds_changed', function() {
+					searchBox.setBounds(map.getBounds());
+				});
+				
+				// Listen for the event fired when the user selects a prediction and retrieve
+				// more details for that place.
+				searchBox.addListener('places_changed', function() {
+					// Limit Click(request) Speed
+					if (clickEnable){
+						clickEnable = false;
+						setTimeout('clickEnable = true;', clickEnableTimeout); // 限制每幾秒能設定目的地一次，避免google api丟error
+						
+						clearTimeout(clickEnableTimeoutID); // 清除前次的限制秒數倒數
+						clickEnableTimeoutID = setTimeout('clickEnableTimeout = 800;', clickEnableTimeout + 3000); // 當限制秒數到了（倒數時間到），而且沒有再次累增秒數，重設秒數
+																												   // (= 等待3秒後，clickEnableTimeout開始衰退)。避免clickEnableTimeout停在那裡，不會隨著時間衰減
+						clickEnableTimeout += 3000;
+						
+						if (clickEnableTimeout > 7000){ // 當限制秒數累增超過7000 ms時，重設秒數
+							clickEnableTimeout = 800; 
+						}
+					}
+					else{
+						alert("請稍待地圖API冷卻，再重新設定目的地點！");
+						return;
+					}
+				
+					var places = searchBox.getPlaces();
+
+					if (places.length == 0) {
+						return;
+					}
+
+					/*// Clear out the old searchResult markers.
+					searchResult.forEach(function(marker) {
+					  marker.setMap(null);
+					});
+					searchResult = [];*/
+
+					// For each place, get the icon, name and location.
+					var bounds = new google.maps.LatLngBounds();
+					places.forEach(function(place) {
+						/* /// 特製化place icon ///
+						var icon = {
+							url: place.icon,
+							size: new google.maps.Size(71, 71),
+							origin: new google.maps.Point(0, 0),
+							anchor: new google.maps.Point(17, 34),
+							scaledSize: new google.maps.Size(25, 25)
+						};
+
+						// Create a marker for each place.
+						searchResult.push(new google.maps.Marker({
+							map: map,
+							icon: icon,
+							title: place.name,
+							position: place.geometry.location
+						}));*/
+
+						/*if (place.geometry.viewport) { 自動調整視野符合bound /part1
+							// Only geocodes have viewport.
+							bounds.union(place.geometry.viewport);
+						} else {
+							bounds.extend(place.geometry.location);
+						}*/
+						
+						map.panTo(place.geometry.location); // (自動調整動畫)將地圖center調整至使用者選擇的place點
+						
+						/* 新增新的目的地 Destination Listener*/
+						setDestination(place.geometry.location);
+						
+						if (lastRouteRecord != undefined){ // check whether lastRouteRecord is used or not.
+							lastRouteRecord.setMap(null); // clean last route
+						}
+						
+						routeCount = 0; 				
+						for (var i=0; i<markers.length; i++){
+							calculateAndDisplayRoute(markers[i], markerDestination, function(){
+								routeCount ++;
+								if (routeCount == markers.length){ // check all data were stored.
+									if (sortFlipflop){
+										markers.sort(compareDuration); // sort marker by duration.
+									}
+									else{
+										markers.sort(compareDistance); // sort marker by distance.
+									}
+									displaySortedResult(); // show results
+								}
+							});
+						}
+					});
+					//map.fitBounds(bounds); 自動調整視野符合bound /part2
+				});
+				
+				// Start to scan map
+				$.ajax({type: "GET", 
+					url: "ajax/FetchMaxID.php",
+					dataType: "json",
+					async: false,
+					success: function(MaxID) { 
+						scanMap(MaxID);
+					},
+					error: function(){
+						alert("Initial MaxID Failed");
+					},
+				});	
+			}
+			
+			google.maps.event.addDomListener(window, "load", initMap); // LOAD MAP
+			
+			var iconBase = 'src/marker/';
+			var icons = {
+				destination: {
+					icon: iconBase + 'doge_marker_red.png'
+				},
+				footprint: {
+					icon: iconBase + 'footprint.png'
+				},
+				unseen: {
+					icon: iconBase + 'transparent_16x16.png'
+				},
+				easy: {
+					icon: {
+						path: google.maps.SymbolPath.CIRCLE,
+						scale: 9,
+						strokeColor: '#0F0',
+						strokeOpacity: 1.0,
+						strokeWeight: 5
+					}
+				},
+				busy: {
+					icon: {
+						path: google.maps.SymbolPath.CIRCLE,
+						scale: 9,
+						strokeColor: '#F00',
+						strokeOpacity: 1.0,
+						strokeWeight: 5
+					}
+				},
+				noSinal: {
+					icon: {
+						path: google.maps.SymbolPath.CIRCLE,
+						scale: 9,
+						strokeColor: '#FF0',
+						strokeOpacity: 1.0,
+						strokeWeight: 5
+					}
+				}
+			};
+			
+			function addMarker(feature){ // Add marker on map
+				//var marker = new google.maps.Marker({
+				var marker = new SlidingMarker({
+					position: feature.position,
+					map: map,
+					title: feature.date,
+					icon: icons[feature.type].icon
+				});
+				
+				marker.setValues({ // custom values
+					id: feature.id,
+					directionsDisplay: new google.maps.DirectionsRenderer(rendererOptions),
+					routeDistance: -1,
+					routeDuration: -1, /* Can NOT name "duration" that is duplicate as property in the SlidingMarker Class */
+					state: feature.state,
+					isMember: feature.isMember,
+					TTL: 45
+				});
+
+				return marker;
+			}
+			
+			function setDestination(position){
+				if (markerDestination != undefined){ // check whether markerDestination is used or not.
+					markerDestination.setMap(null); // clear markerDestination.
+				}
+				
+				var feature = {
+					position: position,
+					type: 'destination',
+					id: "markerDestination"
+				};
+				
+				markerDestination = addMarker(feature);
+				markerDestination.setValues({draggable: true}); // set Destination draggable 施工中
+			}
+			
+			// Sets the map on all markers in the array.
+			function setMapOnAll(map) { 
+			//function setMapOnAll() { // 測試
+				for (var i = 1; i < markers.length; i++) {
+					markers[i].setMap(map);
+					//markers[i].setVisible(false); // 測試
+				}
+			}
+			
+			function cleanMap(){
+				clearTimeout(catPawTimeoutID);
+				clearTimeout(cleanMapTimeoutID);
+				$('#cat-paw-image').removeClass('cat'); // remove class
+				
+				document.getElementById("cat-paw").style.display = "inline";
+				//document.getElementById("cat-paw-image").className = "cat";
+				setTimeout(function(){ /* Firefox 會自動優化，省略「removeClass後馬上addClass」的重複動作 */
+					$('#cat-paw-image').addClass('cat'); // add class
+				}, 10);
+				cleanMapTimeoutID = setTimeout(function(){
+					map.panTo(new google.maps.LatLng(25.066423, 121.5049297)); // default position	捷運台北橋站
+					map.setZoom(13); // default zoom
+					if (markerDestination != undefined){ // check whether markerDestination is used or not.
+						markerDestination.setMap(null); // clear markerDestination.
+						markerDestination = (function () { return; })(); // set markerDestination = undefined
+					}
+					if (lastRouteRecord != undefined){ // check whether lastRouteRecord is used or not.
+						lastRouteRecord.setMap(null); // clean last route
+						lastRouteRecord = (function () { return; })(); // set lastRouteRecord = undefined
+					}
+
+					displaySortedResult(); // refresh table
+				}, 1400);
+				catPawTimeoutID = setTimeout(function(){
+					document.getElementById("cat-paw").style.display = "none";
+				}, 1900);			
+			}
+			
+			function calculateAndDisplayRoute(origin, destination, callback) {
+				directionsService.route({
+					origin: origin.getPosition(),
+					destination: destination.getPosition(),
+					travelMode: google.maps.TravelMode.DRIVING,
+					unitSystem: google.maps.DirectionsUnitSystem.METRIC
+				}, function(response, status) {
+					if (status === google.maps.DirectionsStatus.OK) {
+						origin.directionsDisplay.setDirections(response);
+						
+						//console.log(response.routes[0].legs[0].distance.value); // Debug
+						origin.set("routeDistance", response.routes[0].legs[0].distance.value);
+						origin.set("routeDuration", response.routes[0].legs[0].duration.value);
+						
+						callback();
+					} 
+					else {
+						//window.alert('Directions request failed due to ' + status);
+						console.log('Directions request failed due to ' + status);
+					}
+			  });
+			}
+			
+			function displaySortedResult(){			
+				//document.getElementById("rank-table").innerHTML = "<tr><th>ID</th><th>距離</th><th>估計時間</th><th>狀態</th></tr>";
+				$('#rank-table tbody').remove(); // clear old content of table except title.
+				
+				/*var i =0; ///BAD Version///
+				markers.forEach(function(elem){
+					document.getElementById("rank-table").innerHTML += '<tr style="cursor: pointer;">' 
+																		+ '<td style="text-align: center;">' + (i+1) + '</td>'
+																		+ '<td style="text-align: center;">' + elem.id + '</td>' 
+																		+ '<td style="text-align: right;">' + (elem.routeDistance / 1000).toFixed(2) + ' km</td>'
+																		+ '<td style="text-align: right;">' + elem.routeDuration + 's</td>'
+																		+ '<td style="text-align: center;">' + elem.state + '</td>'
+																		+ '<td>tt</td>'
+																		+ '</tr>';
+																		
+					document.getElementById("rank-table").rows[i].onclick = function (){alert(i);};
+					i++
+				});*/
+				
+				/* Generate Table*/
+				if (markerDestination != undefined){
+					for (var i=0; i<markers.length; i++){
+						var table = document.getElementById("rank-table"); // get table
+						var tbody = document.createElement('tbody'); // create a <tbody> tag = create a tbody(table content)
+						
+						var row = document.createElement('tr'); // create a <tr> tag = create a row
+						row.style.cursor = "pointer"; // 游標經過上方的樣式
+						row.onclick = (function () { // onClick 事件	// closure
+							var iTemp = i;
+							return function(){
+								displayRouteOnTableClick(markers[iTemp].directionsDisplay);
+							}
+						})();
+						
+						var col1 = document.createElement('td'); // 排序 	// create a <td> tag = create a column
+						col1.style.textAlign = "center"; // 文字置中
+						col1.innerText = (i+1); // 文字內容
+						var col2 = document.createElement('td'); // uID
+						col2.style.textAlign = "center";
+						col2.innerText = markers[i].id; 
+						var col3 = document.createElement('td'); // 距離
+						col3.style.textAlign = "right";
+						col3.innerText = (markers[i].routeDistance == -1)?"計算中...":(markers[i].routeDistance / 1000).toFixed(2) + " km"; 
+						var col4 = document.createElement('td'); // 花費時間
+						col4.style.textAlign = "right"; 
+						col4.innerText = (markers[i].routeDuration == -1)?"計算中...":markers[i].routeDuration + " s";
+						var col5 = document.createElement('td'); // 狀態
+						col5.style.textAlign = "center"; 
+						col5.innerText = (parseInt(markers[i].state))?'忙碌':'正常'; 
+						var col6 = document.createElement('td'); // 通訊
+						col6.style.textAlign = "center"; 
+						if (markers[i].isMember){
+							col6.style.cursor = "default"; 
+						
+							var msgBtn = document.createElement('img'); // 通訊圖案按鈕
+							msgBtn.src = "src/message_button.png"
+							msgBtn.className = "message-button";
+							msgBtn.onclick = (function(){ // closure
+								var id = markers[i].id;							
+								return function (){
+									//var msgBtnOffset = msgBtn.offset(); JQuery
+									var offset = getOffsetRect(msgBtn);
+								
+									createMessageBox(offset.top, offset.left, id);
+								}
+							})();
+							
+							col6.appendChild(msgBtn);
+						}
+						else{
+							col6.innerText = ""; 
+						}
+						
+						row.appendChild(col1); // column連接父元素row
+						row.appendChild(col2);
+						row.appendChild(col3);
+						row.appendChild(col4);
+						row.appendChild(col5);
+						row.appendChild(col6);
+						
+						tbody.appendChild(row); // row連接父元素tbody
+						table.appendChild(tbody); // tbody連接父元素table
+					}
+				}
+			}
+			
+			function createMessageBox(top, left, id){
+				if (isMsgBoxOpen){ // 假如已經有msgBox打開的話
+					$('.message-box').remove(); // close old msgBox
+					isMsgBoxOpen = false;
+				}
+				
+				// check the latest message is be read
+				$.ajax({type: "POST", 
+					url: "ajax/IsUnseen.php",
+					dataType: "json",
+					data: {account: id},
+					async: false,
+					success: function(check) { 
+						var isUnseen = (check)?true:false;
+						
+						var msgBoxInput = document.createElement('textarea'); // 輸入框
+						msgBoxInput.type = "text";
+						msgBoxInput.className = "message-box-input";
+						msgBoxInput.maxlength = "50"; // Warning
+						msgBoxInput.placeholder = "(50字以內)"; // Warning
+						msgBoxInput.readOnly = (isUnseen)?true:false;
+						msgBoxInput.disabled = (isUnseen)?true:false;
+						
+						var notifyText = document.createElement('p'); // 警告文字
+						notifyText.className = "message-box-notify";
+						notifyText.innerText = (isUnseen)?"前一筆訊息還未被用戶讀取":"";
+						
+						var cancelBtn = document.createElement('button'); // 取消按鈕
+						cancelBtn.className = "cancel-button";
+						cancelBtn.innerText = "取消";
+						cancelBtn.onclick = function(){
+							isMsgBoxOpen = false;
+							$('.message-box').remove(); // close msgBox
+						};
+						
+						var sendMsgBtn = document.createElement('button'); // 送訊按鈕
+						sendMsgBtn.className = "send-message-button";
+						sendMsgBtn.innerText = "傳送";
+						sendMsgBtn.onclick = (isUnseen)
+						?(function(){
+							return;
+						})
+						:(function() {
+							var msg = $(".message-box-input").val();
+							
+							sendMessage(id, msg); // will send message and close msgBox
+						});
+						
+						var msgBox = document.createElement('div');
+						msgBox.className =  "message-box";
+						msgBox.style.top = (top+20).toString() + "px"; // offset y+20
+						msgBox.style.left = (left-230).toString() + "px"; // offset x-230
+						msgBox.appendChild(msgBoxInput);
+						msgBox.appendChild(notifyText);
+						msgBox.appendChild(cancelBtn);
+						msgBox.appendChild(sendMsgBtn);
+						
+						var routeContent = document.getElementById("rank-route");
+						routeContent.appendChild(msgBox);
+						$( ".cancel-button" ).button();
+						$( ".send-message-button" ).button();
+						
+						isMsgBoxOpen = true;
+					},
+					error: function(){
+						console.log("Check msg unseen Failed. Create msgBox aborted !");
+					},
+				});	
+			}
+			
+			function sendMessage(id, msg){
+				$.ajax({type: "POST", 
+					url: "ajax/SendMessage.php",
+					dataType: "json",
+					data: {account: id,
+						   message: msg},
+					async: false,
+					success: function(check) { 
+						//console.log(check);
+						if (parseInt(check) == true){
+							isMsgBoxOpen = false;
+							$('.message-box').remove(); // close msgBox
+						}
+						else{
+							alert("傳送失敗");
+						}
+						
+						return (parseInt(check))?true:false;
+					},
+					error: function(){
+						console.log("Failed to send message");
+						alert("傳送失敗，因為：");
+						return false;
+					},
+				});	
+			}
+			
+			/*function getOffsetSum(elem) { BUG一堆，亂算
+				var top=0, left=0
+				while(elem) {
+					top = top + parseInt(elem.offsetTop)
+					left = left + parseInt(elem.offsetLeft)
+					elem = elem.offsetParent        
+				}
+				   
+				return {top: top, left: left}
+			}*/
+			
+			function getOffsetRect(elem) {
+				var box = elem.getBoundingClientRect()
+				
+				var body = document.body
+				var docElem = document.documentElement
+				
+				var scrollTop = window.pageYOffset || docElem.scrollTop || body.scrollTop
+				var scrollLeft = window.pageXOffset || docElem.scrollLeft || body.scrollLeft
+				
+				var clientTop = docElem.clientTop || body.clientTop || 0
+				var clientLeft = docElem.clientLeft || body.clientLeft || 0
+				
+				var top  = box.top +  scrollTop - clientTop
+				var left = box.left + scrollLeft - clientLeft
+				
+				return { top: top, left: left }
+			}
+			
+			function displayRouteOnTableClick(directionsDisplay){
+				/*directionsDisplay.setOptions({
+					suppressPolylines: false
+				});*/
+				if (lastRouteRecord != undefined){ // check whether lastRouteRecord is used or not.
+					lastRouteRecord.setMap(null); // clean last route
+				}
+				
+				directionsDisplay.setMap(map); // display
+				lastRouteRecord = directionsDisplay; // store
+			}
+			
+			function sortTable(setting){
+				sortFlipflop = setting;
+				
+				if (sortFlipflop){
+					markers.sort(compareDuration);
+					document.getElementById("distanceSortOption").innerHTML = "▲";
+					document.getElementById("durationSortOption").innerHTML = "▼";
+				}
+				else {
+					markers.sort(compareDistance);
+					document.getElementById("distanceSortOption").innerHTML = "▼";
+					document.getElementById("durationSortOption").innerHTML = "▲";
+				}
+				
+				displaySortedResult();
+			}
+			
+			function compareDistance(marA, marB){
+				if (marA.routeDistance > marB.routeDistance){ // bigger
+					return 1;
+				}
+				
+				if (marA.routeDistance < marB.routeDistance){ // smaller
+					return -1;
+				}
+				
+				return 0; // equal
+			}
+			
+			function compareDuration(marA, marB){
+				if (marA.routeDuration > marB.routeDuration){ // longer
+					return 1;
+				}
+				
+				if (marA.routeDuration < marB.routeDuration){ // faster
+					return -1;
+				}
+				
+				return 0; // equal
+			}
+			
+			function timeDifference(pre, post){
+				var pre = pre.split(/[- :.]/); // **Regular Expression 
+				var post = post.split(/[- :.]/); // **right to left, (so Variable = Parameter.split(/[- :]/))
+				
+				var preDate = new Date( Date.UTC(pre[0], pre[1]-1, pre[2], pre[3], pre[4], pre[5]) );
+				var postDate = new Date( Date.UTC(post[0], post[1]-1, post[2], post[3], post[4], post[5]) );
+				
+				return postDate - preDate;
+			}
+			
+			function isMarked(element, index, array){
+				return element.id == this;
+			}
+			
+			function GoToDie(element, index, array){
+				element.TTL -= 3; 
+				console.log(element.id + " " + element.TTL);
+				
+				/*if (element.TTL <= 0){
+					element.setMap(null);
+					//array.splice(index, 1);
+					markers.splice(array.length - 1 - index, 1); // because it reverse()
+					//index -= 1; // It does NOT work
+				}*/
+				if (element.TTL == 0){ // dead
+					element.setMap(null);
+					if (lastRouteRecord == element.directionsDisplay){ // if now displaying this dying element's route
+						lastRouteRecord.setMap(null); // clean route
+						lastRouteRecord = (function () { return; })(); // set lastRouteRecord = undefined
+					}
+					markers.splice(array.length - 1 - index, 1); // because it reverse()
+				}
+				if (element.TTL == 24){
+					markers[array.length - 1 - index].setIcon(icons['noSinal'].icon);
+					
+					// set a blinking animation when not get user sinal for a period of time.
+					var blinkingIntervalID;
+					blinkingIntervalID = window.setInterval(function(){
+						// animation
+						if ( element.getVisible() ){
+							element.setVisible(false);
+						}
+						else{
+							element.setVisible(true);
+						}
+
+						if (element.TTL > 25){ // if get new sinal
+							element.setVisible(true); // make sure element is visible
+							element.setIcon(icons[(parseInt(element.state))?'busy':'easy'].icon);
+							clearInterval(blinkingIntervalID); // stop
+						}
+						
+						if (element.TTL == 0){ // dead	/* dead得分開兩個部分判斷，不然部分Marker會停不下來(測到第二筆資料就會這樣)，一直跑TTL-=3	I don't know why~ */
+							clearInterval(blinkingIntervalID); // stop	/* 不清楚是slice()產生的copy的問題，還是排程函式執行順序的問題 */
+						}										/* 是capture blinkingIntervalID的問題，捕捉到前一個數值 */
+					}, Math.floor(Math.random() * 800 + 500)); // 500~799 ms
+				}
+			}
+			
+			function changeStateAnimate(feature, newPosition, movingUser){
+				// set a blinking animation when user's state change.
+				var blinkingMarker = addMarker(feature); // new a blinkingMarker before(under) movingUser
+				var count = 25, times = 0;
+				var blinkingIntervalID;
+				blinkingMarker.icon.strokeColor = (parseInt(feature.state))?'#FF359A':'#1AFD9C'; // ?霓虹:藍綠
+				blinkingMarker.setZIndex(-1); // 設在正常marker的下一層
+				
+				blinkingIntervalID = window.setInterval(function(){ // animation
+					times ++;
+					if (times < 21){ // 1~20
+						count = (count+1.25);
+					}
+					else{ // 21~60
+						count = (count-1.25);
+					}
+					//console.log(times + " " + count);
+					
+					var icon = blinkingMarker.get('icon');
+					//var user = movingUser.get('icon');
+					icon.scale = 8.5 + (11 - 8.5) / 50 * count; // base + variation(target - base) / 50等份 * count
+					icon.strokeOpacity =  0.0 + (3.0 - 0.0) / 50 * count;
+					icon.strokeWeight = 8.5 + (13.5 - 8.5) / 50 * count;
+					//user.strokeOpacity =  7.0 - (7.0 - 0.0) / 50 * count;
+					blinkingMarker.set('icon', icon);
+					//movingUser.set('icon', user);
+												
+					if ( count == 0 ){
+						movingUser.setIcon(icons[feature.type].icon); // change icon tyoe
+						blinkingMarker.setMap(null); // delete blinkingMarker
+						clearInterval(blinkingIntervalID); // stop the execution
+					}
+				}, 20); // 60 * 20 ms
+				
+				blinkingMarker.setPosition(newPosition); // move along/with movingUser's path
+			}
+			
+			function bornOnMap(feature, state){
+				// set a blinking animation when user first be marked on map.
+				var blinkingMarker = addMarker(feature); // new a blinkingMarker before(under) movingUser
+				var count = 0, times = 0;
+				var blinkingIntervalID;
+				blinkingMarker.icon.strokeColor = (parseInt(state))?'#FF359A':'#A8FF24';
+				
+				blinkingIntervalID = window.setInterval(function(){ // animation
+					times ++;
+					if (times < 21){ // 1~20
+						count = (count+2.5);
+					}
+					else if (times > 30 && times < 40){ // 31~39
+						count = (count-5);
+					}
+					else if (times > 45 && times < 55){ // 46~54
+						count = (count+5);
+					}
+					else if (times > 65){ // 66~85
+						count = (count-2.5);
+					}
+					//console.log(blinkingMarker.id + " " + times + " " + count);
+					
+					var icon = blinkingMarker.get('icon');
+					icon.scale = 9 + (11 - 9) / 50 * count; // base + variation(target - base) / 50等份 * count
+					icon.strokeOpacity =  0.0 + (4.0 - 0.0) / 50 * count;
+					icon.strokeWeight = 9 + (13.5 - 9) / 50 * count;
+					blinkingMarker.set('icon', icon);
+						
+					if ( count == 0 ){
+						blinkingMarker.setMap(null); // delete blinkingMarker										
+						clearInterval(blinkingIntervalID); // stop the execution
+					}
+				}, 20); // 85 * 20 ms
+			}
+			
+			function openNav() {
+				document.getElementById("icon-sidenav-pane").style.width = "300px";
+				
+				document.getElementById("icon-sidenav-shim").style.display = "inline";
+				document.getElementById("icon-sidenav-shim").style.opacity = "0.3";
+			}
+
+			function closeNav() {
+				document.getElementById("icon-sidenav-pane").style.width = "0";
+				
+				document.getElementById("icon-sidenav-shim").style.display = "none";
+				document.getElementById("icon-sidenav-shim").style.opacity = "0";
+			}
+			
+			function scanMap(nowID){ // Post to Query User Position			
+				//recieve user's position from database and move/mark on map
+				$.ajax({type: "POST", 
+					url: "ajax/RouteMapAJAX.php",
+					dataType: "json",
+					data: {nowID: nowID},
+					async: false,
+					success: function(user) { 
+						if (user){ // if return not false
+							//console.log(user);
+							var scanResult = []; // Array of marker, use to check if the marker is marked or not for each scan
+							for (var i=user.length-1; i>=0; i--){ // back to front	 從最新的資料開始mark，如遇到在這次scan已經使用的data(代表比較舊了)，continue
+								var movingUser;
+								if ( (movingUser = scanResult.find(isMarked, user[i].uID)) != undefined ){ // check if the latest user data is already be used or not
+									continue;
+								}
+								else if ( (movingUser = markers.find(isMarked, user[i].uID)) != undefined ){ // check if user already be marked on map or not
+									console.log(user[i].uID + " found!");
+									if (movingUser.state != user[i].state){ // if state change
+										movingUser.state = user[i].state; // set state change, but doesn't change icon type now
+										
+										var feature = 
+											{
+												position: movingUser.position, // 先設在movingUser的position（未移動前的position）
+												type: (parseInt(user[i].state))?'busy':'easy', /* data transfer from PHP to JS would convert to string */
+												date: user[i].date, // Warning !! Server data has error .00000
+												state: user[i].state, // 0: 正常	1: 忙碌
+												id: user[i].uID
+											};
+										
+										changeStateAnimate(feature, new google.maps.LatLng(user[i].latitude, user[i].longitude), movingUser);
+									}
+									movingUser.setPosition(new google.maps.LatLng(user[i].latitude, user[i].longitude)); // move to new position
+									movingUser.TTL = 45; // renew the TTL
+									//console.log(movingUser);
+									scanResult.push(movingUser); // store for each scan check
+								}
+								else{ // user is a new user not yet marked on the map
+									var feature = 
+										{
+											position: new google.maps.LatLng(user[i].latitude, user[i].longitude),
+											type: (parseInt(user[i].state))?'busy':'easy', /* data transfer from PHP to JS would convert to string */
+											date: user[i].date, // Warning !! Server data has error .00000
+											state: user[i].state, // 0: 正常	1: 忙碌
+											id: user[i].uID,
+											isMember: (parseInt(user[i].is_member))?true:false
+										};
+									bornOnMap(feature); // set a blinking animation when user first be marked on map.
+									
+									movingUser = addMarker(feature); // new a SlidingMarker
+									markers.push(movingUser); // store
+									scanResult.push(movingUser); // store for each scan check
+									
+									var infowindow = new google.maps.InfoWindow({
+										content: user[i].uID,
+										maxWidth: 200
+									});
+									infowindow.open(map, movingUser);
+								}
+																
+								nowID = user[i].id; // update nowID
+							}
+						}
+						else{ // if return false (no new data)
+							// do-nothing
+						}
+						
+						markers.slice().reverse().forEach(GoToDie); /* ES5 support*/
+						/*for (var i=markers.length-1; i>=0; i--){  要從尾巴開始跑，因為splice會位移後面的index 
+							markers[i].TTL -= 3; 
+							console.log(markers[i].id + " " + markers[i].TTL);
+							
+							if (markers[i].TTL <= 0){
+								markers[i].setMap(null);
+								markers.splice(i, 1);
+								//index -= 1; // It does NOT work
+							}
+							else if (markers[i].TTL < 25){
+								// 施工中
+							}
+						}*/
+						console.log(nowID);
+						
+						/* update route table */
+						if ( (markers.length > 0) && ((scanNoGetRouteTimes > 1) || (clickEnable)) && (markerDestination != undefined) ){ // if markers have data && request limit free && destination is already be set
+							scanNoGetRouteTimes = 0; // reset
+							
+							// set request limit
+							clickEnable = false;
+							setTimeout('clickEnable = true;', clickEnableTimeout); // 限制每幾秒能設定目的地一次，避免google api丟error
+							
+							clearTimeout(clickEnableTimeoutID); // 清除前次的限制秒數倒數
+							clickEnableTimeoutID = setTimeout('clickEnableTimeout = 800;', clickEnableTimeout + 3000); // 當限制秒數到了（倒數時間到），而且沒有再次累增秒數，重設秒數
+																													   // (= 冷卻/等待1秒後，clickEnableTimeout開始衰退)。避免clickEnableTimeout停在那裡，不會隨著時間衰減
+							clickEnableTimeout += 3000;
+							
+							if (clickEnableTimeout > 7000){ // 當限制秒數累增超過7000 ms時，重設秒數
+								clickEnableTimeout = 800; 
+							}
+							
+							// route
+							routeCount = 0; 			
+							for (var i=0; i<markers.length; i++){
+								calculateAndDisplayRoute(markers[i], markerDestination, function(){ // callback function
+									routeCount ++;
+									if (routeCount == markers.length){ // check all data were stored.
+										if (sortFlipflop){
+											markers.sort(compareDuration); // sort marker by duration.
+										}
+										else{
+											markers.sort(compareDistance); // sort marker by distance.
+										}
+										displaySortedResult(); // show results
+									}
+								});
+							}
+						}
+						else{
+							if (markerDestination != undefined){ // 沒有set目的地的話就什麼都不跑
+								scanNoGetRouteTimes ++;
+								displaySortedResult(); // show results	即使沒有成功route，也要refresh table
+							}
+						}
+						
+						window.setTimeout("scanMap(" + nowID + ")", 3000);
+					},
+					error: function(){
+						alert("AJAX Failed");
+					},
+				});	
+			}
+		</script>
+	</body>
+</html>

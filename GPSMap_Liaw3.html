@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GPS Log</title>
+		<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+		<script src="https://rawgithub.com/CryMasK/furry-robot/master/random-color.js">// dor random color for polyline</script>
+		<style>
+			html, body	{
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+				background: #FAFAFA;
+			}
+			
+			#uID-input-container {
+				background-color: rgb(69, 173, 149); /* rgb(64, 143, 135); */
+				height: 5%;
+				width: auto;
+				padding: 6px 0px 8px 0px; 
+				z-index: 86;
+				-webkit-box-shadow: 0 0 18px rgba(0, 0, 0, 0.9);
+			}
+			
+			#menu-hamburger-container {
+				height: 48px;
+				width: 48px;
+				margin-right: 10px;
+				float: left;
+				background: rgba(0, 0, 0, 0.85);
+				cursor: pointer;
+				overflow: hidden;
+				z-index: 87;
+				-webkit-box-shadow: 1px 5px 17px 0px rgba(0, 0, 0, 0.8);
+			}
+			
+			#menu-hamburger-image {
+				position: relative;
+				left: -48px;
+			}
+			
+			#uID-input-form {
+				/*height: 31px;
+				width: 600px;
+				font-size: 16px;
+				border: 1px solid;
+				border-color: hsla(210,54%,20%,.15) hsla(210,54%,20%,.17) hsla(210,54%,20%,.2);
+				border-radius: 0 2px 2px 0;
+				border-inline-start: 1px solid transparent;*/
+				
+				background-color: rgb(233, 238, 238);
+				display: -moz-box;
+				display: -webkit-flex; /* bug */
+				position: relative;
+				height: 36px;
+				margin-top: 5px;
+				-moz-box-flex: 1;
+				-webkit-box-flex: 1; /* bug */
+				max-width: 600px; /* 2 * (290 cell width + 10 cell margin) */
+			}
+			
+			#uID-input-form:focus {
+				background-color: rgb(15, 140, 180); /* #0F8CB4 */
+			}
+			
+			#uID-input-icon {
+				border: 1px transparent;
+				padding: 0;
+				margin: 0;
+				width: 36px;
+				height: 36px;
+				background: url("src/search-indicator-magnifying-glass.svg") center center no-repeat;
+				position: absolute;
+			}
+			
+			#uID-input{			
+				-moz-box-flex: 1;
+				-webkit-flex: 1; /* bug */
+				/*width: 600px;*/ /* bug */
+				padding-top: 6px;
+				padding-bottom: 6px;
+				padding-left: 34px;
+				padding-right: 8px;
+				background: hsla(0,0%,100%,.9) padding-box;
+				border: 1px solid;
+				border-spacing: 0;
+				border-radius: 2px 0 0 2px;
+				border-color: hsla(210,54%,20%,.15) hsla(210,54%,20%,.17) hsla(210,54%,20%,.2);
+				box-shadow: 0 1px 0 hsla(210,65%,9%,.02) inset,
+							0 0 2px hsla(210,65%,9%,.1) inset,
+							0 1px 0 hsla(0,0%,100%,.2);
+				color: inherit;
+				font-size: 16px;
+			}
+			
+			#uID-input:dir(rtl) {
+			  border-radius: 0 2px 2px 0;
+			}
+
+			#uID-input[aria-expanded="true"] {
+			  border-radius: 2px 0 0 0;
+			}
+
+			#uID-input[aria-expanded="true"]:dir(rtl) {
+			  border-radius: 0 2px 0 0;
+			}
+
+			#uID-input[keepfocus],
+			#uID-input:focus,
+			#uID-input[autofocus] {
+			  border-color: hsla(206,100%,60%,.6) hsla(206,76%,52%,.6) hsla(204,100%,40%,.6);
+			}
+
+			#uID-input-submit {
+				margin-inline-start: -1px;
+				background: url("src/search-arrow-go.svg#search-arrow-go") center center no-repeat, linear-gradient(hsla(0,0%,100%,.8), hsla(0,0%,100%,.1)) padding-box;
+				padding: 0;
+				border: 1px solid;
+				border-color: hsla(210,54%,20%,.15) hsla(210,54%,20%,.17) hsla(210,54%,20%,.2);
+				border-radius: 0 2px 2px 0;
+				border-inline-start: 1px solid transparent;
+				box-shadow: 0 0 2px hsla(0,0%,100%,.5) inset,
+							0 1px 0 hsla(0,0%,100%,.2);
+				color: inherit;
+				cursor: pointer;
+				transition-property: background-color, border-color, box-shadow;
+				transition-duration: 150ms;
+				width: 50px;
+			}
+
+			#uID-input-submit:dir(rtl) {
+				border-radius: 2px 0 0 2px;
+			}
+			
+			#uID-input:focus + #uID-input-submit,
+			#uID-input + #uID-input-submit:hover,
+			#uID-input[autofocus] + #uID-input-submit {
+			  border-color: #59b5fc #45a3e7 #3294d5;
+			  color: white;
+			}
+
+			#uID-input:focus + #uID-input-submit,
+			#uID-input[keepfocus] + #uID-input-submit,
+			#uID-input[autofocus] + #uID-input-submit {
+			  background: url("src/search-arrow-go.svg#search-arrow-go-inverted") center center no-repeat, linear-gradient(#20b7e8, #0F8CB4); /* #4cb1ff, #1793e5 */
+			  box-shadow: 0 1px 0 hsla(0,0%,100%,.2) inset,
+						  0 0 0 1px hsla(0,0%,100%,.1) inset,
+						  0 1px 0 hsla(210,54%,20%,.03);
+			}
+			
+			#uID-input-submit:hover {
+				background: url("src/search-arrow-go.svg#search-arrow-go-inverted") center center no-repeat, linear-gradient(#20b7e8, #0F8CB4); /* #4cb1ff, #1793e5 */
+				box-shadow: 0 1px 0 hsla(0,0%,100%,.2) inset,
+							0 0 0 1px hsla(0,0%,100%,.1) inset,
+							0 1px 0 hsla(210,54%,20%,.03),
+							0 0 4px hsla(206,100%,20%,.2);
+			}
+			
+			#uID-input + #uID-input-submit:hover:active {
+			  box-shadow: 0 1px 1px hsla(211,79%,6%,.1) inset,
+						  0 0 1px hsla(211,79%,6%,.2) inset;
+			  transition-duration: 0ms;
+			}
+
+			#map-canvas	{
+				height: 87%;
+				margin: 0px;
+			}
+			
+			#icon-sidenav-shim {
+				display: none;
+				position:fixed;
+				height: 100%;
+				width: 100%;
+				top: 0;
+				left: 0;
+				background: black;
+				opacity: 0;
+				z-index: 85;
+				transition-property: opacity;
+				transition-duration: 0.3s;
+			}
+			
+			.icon-sidenav {
+				height: 100%;
+				width: 0; /* transition to 300px */
+				position: fixed;
+				z-index: 86;
+				top: 0;
+				left: 0;
+				text-align: center;
+				background-color: rgba(5, 5, 5, 0.9);
+				overflow-x: hidden;
+				transition: 0.5s;
+				padding-top: 60px;
+			}
+			
+			.icon-sidenav .closebtn {
+				display: block;
+				position: absolute;
+				top: 0;
+				right: 20px;
+				margin-top: 14px; /* one block 62px = 48px(img) + 14px */
+				margin-left: 50px;
+				max-height: 48px;
+				cursor: pointer;
+				
+				/*text-decoration: none;
+				font-size: 25px;
+				color: white;*/
+			}
+
+			.icon-sidenav a {
+				display: block;
+				padding: 16px;
+				text-decoration: none;
+				font-size: 25px;
+				color: white;
+				transition: all 0.3s ease;
+				z-index: 87;
+			}
+
+			.icon-sidenav a:hover/*, .offcanvas a:focus*/{
+				background-color: #000;
+				/* color: #f1f1f1; */
+			}
+			
+			.icon-sidenav a:focus {
+				background-color: #4CAF50 !important;
+			}
+			
+			.icon-sidenav-active {
+				background: url("src/now_pointer_inverted.png") no-repeat -50px;
+				background-size: contain;
+			}
+
+			@media screen and (max-height: 450px) {
+			  .icon-sidenav {padding-top: 15px;}
+			  .icon-sidenav a {font-size: 18px;}
+			}
+		</style>
+	</head>
+	<body>
+		<script
+		  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRVE_uo1_J0B0B0HXfPT1bQvZ34EQZ_-w&libraries=geometry">
+		  // Cancel "async defer" & "callback" function 
+		</script>
+		<script src="js/jquery-3.1.1.js">// for query MySQL</script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js">// for initial seed to random</script>
+		
+		<!--for animating marker-->
+		<!-- jquery library and jquery.easing plugin are needed -->
+		<script src="js/jquery-3.1.1.min.js"></script>
+		<script src="js/jquery.easing.1.3.js"></script>
+		
+		<!-- we use markerAnimate to actually animate marker -->
+		<script src="js/markerAnimate.js"></script>
+		
+		<!-- SlidingMarker hides details from you - your markers are just animated automagically -->
+		<script src="js/SlidingMarker.min.js"></script>
+		<!--library import end-->
+		
+		<script type="text/javascript">
+			var map;
+			var markers = [], // 2div-Array of marker, markers[ times of query ][ slice of polyline]
+				lines = []; // Array of polyline
+			var queryTimes = -1; // query counter, use to Identify the id of marker, line, ... 
+			
+			function initMap(){
+				var initCenter = new google.maps.LatLng(25.066423, 121.5049297); // 捷運台北橋站
+				var myOptions = { // map's argumernts
+					zoom: 13,
+					center: initCenter, //e vent ocurred site
+					mapTypeId: google.maps.MapTypeId.ROADMAP // map shows road
+				};
+				
+				map = new google.maps.Map(document.getElementById("map-canvas"), myOptions); // create map
+				
+				// auto-resize map by window
+				$(window).resize(function() { 
+					var center = map.getCenter();
+					google.maps.event.trigger(map, "resize");
+					map.setCenter(center); 
+				});
+				
+				// add listener for "enter" key 新增用enter送出查詢
+				document.getElementById("uID-input").addEventListener("keypress", function(event) {
+					event = event || window.event;
+					
+					if (event.keyCode == 13) {
+						getLocation();
+					}
+				});
+				// add click event on 「uID-input-submit」
+				document.getElementById("uID-input-submit").addEventListener("click", function() {
+					getLocation();
+				});
+			}
+			
+			google.maps.event.addDomListener(window, "load", initMap); // LOAD MAP(NOT instead of callback parameter) error in FireFox Add-On
+				
+			var iconBase = 'src/marker/';
+			var icons = {
+				start: {
+					icon: iconBase + 'doge.png'
+				},
+				footprint: {
+					icon: iconBase + 'footprint.png'
+				},
+				unseen: {
+					icon: iconBase + 'transparent_16x16.png'
+				}
+			};
+			
+			function addMarker(feature){ // Add marker on map
+				var marker = new google.maps.Marker({
+					position: feature.position,
+					map: map,
+					title: feature.date,
+					icon: icons[feature.type].icon
+				});
+				
+				// special case 1
+				if (feature.type == 'start'){ // special option on first marker
+					// 點擊執行時速動畫
+					marker.addListener('click', (function() { // add animate play function on 'start' marker	 // closure
+							var lineID = queryTimes;
+							return function(){
+								showAnime_onClick(lineID);
+							}
+						})()
+					);
+					
+					// 滑鼠滑過，跳動動畫
+					marker.addListener('mouseover', function(){
+						if (marker.getAnimation() === null) { // 避免重複跳動的問題
+							marker.setAnimation(google.maps.Animation.BOUNCE);
+						}
+					});
+					marker.addListener('mouseout', function(){
+						if (marker.getAnimation() !== null) {
+							marker.setAnimation(null);
+						}
+					});
+					
+					// 隨機設置跳動動畫
+					Math.seedrandom(33); // seed
+					
+					if (Math.floor(Math.random() * 2)){ // 1/2 of the probability to set animation (1011 0100 101....)
+						setTimeout(function(){
+							marker.setAnimation(google.maps.Animation.BOUNCE);
+							
+							// BOUNCE for 3~5 seconds
+							setTimeout(function(){
+								marker.setAnimation(null); // clean
+							}, Math.floor(Math.random() * 6000 + 3000)); // 3000~5000ms
+						}, Math.floor(Math.random() * 11000 + 1000)); // 1000~10000ms
+					}
+					/*markers[queryTimes].unshift(marker); // push_front the first merker
+					return;*/
+				}
+				
+				// special case 2
+				if (feature.type == 'unseen'){
+					marker.setZIndex(-1); // 讓隱形marker在最下面，不要擋到start marker
+				}
+				
+				markers[queryTimes].push(marker);
+			}
+			
+			// Define the symbol, using one of the predefined paths ('CIRCLE')
+			// supplied by the Google Maps JavaScript API.
+			var lineSymbols = {
+				lightGreen: { // **中括弧(brackets)是陣列；大括弧(Braces)是指標
+					path: google.maps.SymbolPath.CIRCLE,
+					fillColor: '#FFFFFF',
+					fillOpacity: 1,
+					strokeColor: '#00FF00',
+					strokeWeight: 3,
+					scale: 5
+					
+				},
+				unseen: {
+					path: google.maps.SymbolPath.CIRCLE,
+					strokeOpacity: 0
+				}
+			};	
+			
+			//function drawLine(symbolColor){
+			function drawLine(){				
+				// Random color of polyline
+				Math.seedrandom(queryTimes + 56);
+				
+				var r = Math.floor(Math.random() * 256);
+				var g = Math.floor(Math.random() * 256);
+				var b = Math.floor(Math.random() * 256);
+				var color = "rgb("+r+" ,"+g+","+ b+")"; 
+			
+				var line = new google.maps.Polyline({
+								/*icons: [{
+									icon: lineSymbols[symbolColor],
+									offset: '0%'
+								}],*/
+								strokeColor: color,
+								strokeWeight: 5,
+								map: map
+							});
+							
+				line.setValues({ // custom values
+					date: [] // for getSpeed function when creating animate
+				});
+				
+				return line;
+			}
+			
+			// Use the DOM setInterval() function to change the offset of the symbol
+			// at fixed intervals.
+			function animateCircle(line, count, time) {
+				/*var count = 0;
+				
+				window.setTimeout(function() { // use to change line
+					var t = window.setInterval(function() {	// use to change symbol position*/		
+				window.setTimeout(function() {
+					/*count = (count + 1) % 200;*/
+
+					var icons = line.get('icons');
+					icons[0].offset = (count / 2) + '%';
+					if (count == 199){
+						icons[0].icon = lineSymbols['unseen'];
+						//window.clearInterval(t); // stop
+					}
+					else{
+						icons[0].icon = lineSymbols['lightGreen'];
+					}
+					line.set('icons', icons);
+						
+					/*if ( count == 199 ){ // because count % 200
+						window.clearInterval(t);
+					}
+				}, 30);*/
+				}, time);
+			}
+			
+			function walkTheDoge(walkingRoute, time){ // parameter is a line
+				var path = walkingRoute.getPath().getArray(); // path is a google.maps.MVCArray
+				var date = walkingRoute.date;
+				var slidingMarker;
+				var infowindow;
+				
+				var computeData1 = {
+					date: null,
+					position: null
+				};
+				var computeData2 = {
+					date: null,
+					position: null
+				};
+				
+				window.setTimeout(function(){
+					// create a new SlidingMarker on start
+					slidingMarker = new SlidingMarker({ 
+						position: path[0], // the first LatLng in path record
+						map: map,
+						icon: icons['start'].icon,
+						duration: 35 // 移動間隔35ms
+					});
+					
+					infowindow = new google.maps.InfoWindow({
+						content: "0 km/h"
+					});
+					infowindow.open(map, slidingMarker);
+					
+					if (path.length - 1 == 0){ // if only one location infomation in this line. After display this one marker, clean it.
+						slidingMarker.setMap(null);
+					}
+				}, time);
+				
+				for (var i=1; i<path.length; i++){
+					time+=35; // 35ms between each move
+
+					window.setTimeout((function(){
+						var index =i;
+						
+						return function(){
+							slidingMarker.setPosition(path[index]);
+							
+							computeData1.date = date[index-1];
+							computeData1.position = path[index-1];
+							computeData2.date = date[index];
+							computeData2.position = path[index];
+							infowindow.setContent( getSpeed(computeData1, computeData2).toFixed(2) + " km/h" );
+							console.log(infowindow.content + " " + computeData2.date);
+							//computeData1 = computeData2;
+							
+							if (index == path.length - 1){
+								slidingMarker.setMap(null);
+							}
+						}
+					})(), time);
+				}
+				
+				time+=100; // 100+35ms between change line
+				return time;
+			}
+			
+			/*	///用不到///
+			function StepByStep_Anime(index, time){
+				setTimeout( function(){
+						markers[index-1].setVisible(false); // Hide last one marker
+						markers[index].setVisible(true); // Show the marker
+					}, time );
+			}
+			*/
+			
+			// Sets the map on all markers in the array.
+			function setMapOnAll(map) { 
+			//function setMapOnAll() { // 測試
+				for (var i = 1; i < markers.length; i++) {
+					markers[i].setMap(map);
+					//markers[i].setVisible(false); // 測試
+				}
+			}
+
+			function showAnime_onClick(lineID){
+				/*setMapOnAll(null);
+			
+				for (var i=1; i<markers.length; i++){
+					StepByStep_Anime(i, 125 * i);
+				}*/
+				var time=0;
+				for (var i=0; i<lines[lineID].length; i++){
+					time = walkTheDoge(lines[lineID][i], time);
+				}
+			}
+			
+			/* 	///省略不用///
+			function stringToDate(string) {
+				var dateParts = string.split(/[- :]/); 
+				
+				var date = new Date( Date.UTC(dateParts[0], dateParts[1]-1, dateParts[2], dateParts[3], dateParts[4], dateParts[5]) );
+
+				return date;
+			}
+			*/
+			
+			function getSpeed(pre, post){
+				var duration = timeDifference(pre.date, post.date) / 1000;
+				var distance = google.maps.geometry.spherical.computeDistanceBetween(pre.position, post.position);
+				
+				return (distance / duration) * 18 / 5; // m/s to km/h
+			}
+			
+			function timeDifference(pre, post){
+				var pre = pre.split(/[- :.]/); // **Regular Expression 
+				var post = post.split(/[- :.]/); // **right to left, (so Variable = Parameter.split(/[- :]/))
+				
+				var preDate = new Date( Date.UTC(pre[0], pre[1]-1, pre[2], pre[3], pre[4], pre[5]) );
+				var postDate = new Date( Date.UTC(post[0], post[1]-1, post[2], post[3], post[4], post[5]) );
+				
+				return postDate - preDate; // return ms
+			}
+			
+			function openNav() {
+				document.getElementById("icon-sidenav-pane").style.width = "300px";
+				
+				document.getElementById("icon-sidenav-shim").style.display = "inline";
+				document.getElementById("icon-sidenav-shim").style.opacity = "0.3";
+			}
+
+			function closeNav() {
+				document.getElementById("icon-sidenav-pane").style.width = "0";
+				
+				document.getElementById("icon-sidenav-shim").style.display = "none";
+				document.getElementById("icon-sidenav-shim").style.opacity = "0";
+			}
+			
+			function getLocation(){ // Post to Query Location Position
+				var uID = document.getElementById("uID-input").value;
+				if (uID.length == 0){ // check empty
+					return;
+				}
+				
+				//recieve markers' position from database and call function "addMarker()" to mark on map
+				$.ajax({type: "POST", 
+					url: "ajax/LogMapAJAX.php",
+					dataType: "json",
+					data: {uID: uID},
+					async: false,
+					success: function(location) { 
+						queryTimes ++;
+						markers[queryTimes] = new Array(); // Creating a 2div-Array of marker, markers[ times of query ][ slice of polyline]
+						lines[queryTimes] = new Array();
+
+						var line = drawLine();
+						var path = line.getPath();
+						
+						lines[queryTimes].push(line); // store line
+
+						for(var i = 0; i < location.length; i++){
+							/*	/// when have many features, use Array feature ///
+								var feature = [
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'start'
+									}
+								];
+								addMarker(feature[0]);
+							*/
+							
+							if(i==0){
+								/*path.push( new google.maps.LatLng(location[0].latitude, location[0].longitude) );
+								line.date.push(location[0].date);*/
+								var feature = 
+									{
+										position: new google.maps.LatLng(location[0].latitude, location[0].longitude),
+										type: 'start',
+										date: location[0].date, // Warning !! Server data has error
+										id: queryTimes
+									};
+									
+								var infowindow = new google.maps.InfoWindow({
+									content: uID,
+									maxWidth: 200
+								});
+								//continue; // continue the loop
+							}
+							else{
+								if ( (timeDifference(location[i-1].date, location[i].date) >  29000) && ( google.maps.geometry.spherical.computeDistanceBetween( new google.maps.LatLng(location[i-1].latitude, location[i-1].longitude), new google.maps.LatLng(location[i].latitude, location[i].longitude) ) > 300 ) ){ // Non-Recoding time over than 29s && move more than 300m, split the line
+									line = drawLine(); // split for creating a new line
+									path = line.getPath();
+									
+									lines[queryTimes].push(line);
+									
+									var feature =
+										{
+											position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+											type: 'footprint',
+											date: location[i].date, // Warning !!
+											id: queryTimes
+										};
+								}
+								else{
+									var feature =
+										{
+											position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+											type: 'unseen',
+											date: location[i].date // Warning !!
+										};
+								}
+								//addMarker(feature); // 先不add first marker
+							}
+							
+							addMarker(feature);
+							path.push(feature.position);
+							line.date.push(location[i].date);
+						}
+						
+						/* 最後才加第一個座標，以確保start marker在最上層，才按的到 
+						alert("87");
+						var feature = 
+							{
+								position: new google.maps.LatLng(location[0].latitude, location[0].longitude),
+								type: 'start',
+								date: location[0].date, // Warning !! Server data has error
+								id: queryTimes
+							};
+						addMarker(feature);*/
+						infowindow.open(map, markers[queryTimes][0]); // add infowindow on the start marker
+					},
+					error: function(jqXHR, textStatus, errorThrown){
+						console.log(textStatus, errorThrown);
+						alert("AJAX Failed");
+					},
+				});	
+							
+					/*	/// ANOTHER VERSION ///
+						var xmlhttp = new XMLHttpRequest();
+						window.alert("1");
+						xmlhttp.onreadystatechange=function() {
+							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+								var marker = JSON.parse(xmlhttp.responseText);
+								for(var i = 0; i < marker.length; i++){
+									var location = new google.maps.LatLng(marker[i].latitude, marker[i].longitude);
+									addMarker(location);
+								}
+
+							}
+						}
+						//-----------------------------------------------------------------//
+						xmlhttp.open("POST", "json_mysql.php?uID="+uID, true);
+						//-----------------------------------------------------------------//
+						xmlhttp.send();
+					*/
+			}
+		</script>
+		<!--div id="content"-->
+		<div id="uID-input-container">
+			<div id="menu-hamburger-container" onclick="openNav()">
+				<img id="menu-hamburger-image" src="src/quantum_menu-v2-2x.png">
+			</div>
+			<div id="uID-input-form">
+				<div id="uID-input-icon"></div>
+				<input id="uID-input" type="text" dir="auto" placeholder="&#x8F38;&#x5165;uID&#x67E5;&#x8A62;&#x7D00;&#x9304;..." aria-expanded="false"/>
+				<input id="uID-input-submit" value="" aria-label="&#x9001;&#x51FA;&#x67E5;&#x8A62;" type="button" />
+				<!--button type="button" onclick="getLocation()">Click Me!</button--> 
+			</div>
+		</div>
+		<div id="map-canvas"></div>
+		<!--/div-->
+		<div id="icon-sidenav-shim" onclick="closeNav()"></div>
+		<div id="icon-sidenav-pane" class="icon-sidenav">
+			<div class="closebtn" onclick="closeNav()"><img src="src/settings_hdpi-back-default.png" alt="&#x95DC;&#x9589;"></img></div>
+			<a href="http://140.136.150.80/project_D/GPSmap_Liaw2.html">Route</a>
+			<a class="icon-sidenav-active" href="http://140.136.150.80/project_D/GPSmap_Liaw3.html">Log</a>
+		</div>
+	</body>
+</html>

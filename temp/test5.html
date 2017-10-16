@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+		<style type="text/css">			
+			#cleanMap {
+				z-index:87;
+				position: absolute;
+				right: 0;
+				bottom: 0;
+				max-width: 250px;
+				max-height: 230px;
+			}
+			
+			#doge-footprint-image {
+				cursor: pointer;
+				width: 100%;
+			}
+			
+			#content {
+				display: flex;
+				height: 100%;
+				width: 100%;
+			}
+			
+			#cat-paw {
+				display: none;
+				z-index: 87;
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 75%;
+				height: 100%;
+				overflow: hidden;
+			}
+			
+			#cat-paw-image {
+				transform: translate(900px,700px);
+			}
+			
+			.cat {
+				animation-name: punch;
+				animation-duration: 1500ms;
+				animation-timing-function: ease-in;
+				animation-iteration-count: 1;
+			}
+			
+			@keyframes punch {
+				0% {
+					transform: translate(900px, 700px);
+				}
+				90% {
+					transform: translate(550px, 350px);
+				}
+				100%{
+					transform: translate(650px, 500px);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<script src="js/jquery-3.1.1.js">// for query MySQL</script>	
+		
+		<div id="content">		
+			<div id="cleanMap"><img id="doge-footprint-image" src="src/doge_footprint.png" onClick="showAnimation()"></div>
+			<div id="cat-paw"><img id="cat-paw-image" src="src/cat_paw.png"></div>
+		</div>
+		<script type="text/javascript">	
+			var catPawTimeoutID;	
+			
+			function showAnimation(){
+				clearTimeout(catPawTimeoutID);
+				
+				$('#cat-paw-image').removeClass('cat'); // remove class
+				document.getElementById("cat-paw").style.display = "inline";
+				setTimeout(function(){ /* Firefox 會自動優化，省略removeClass後馬上addClass */
+					$('#cat-paw-image').addClass('cat'); // add class
+				}, 10);			
+				
+				catPawTimeoutID = setTimeout(function(){
+					document.getElementById("cat-paw").style.display = "none";
+				}, 1900);			
+			}
+		</script>
+	</body>
+</html>

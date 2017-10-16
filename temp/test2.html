@@ -1,0 +1,70 @@
+	<!DOCTYPE html>
+	<html>
+	<head>
+	<style type="text/css">
+		html,
+		body {
+			background-color: rgb(245, 250, 240);
+		}
+		
+		thead{
+			font-size: 95%;
+			outline: #ff0000 dashed;
+		}
+		tr:hover{
+			//border-style:outset;
+			outline: hsla(183, 93%, 50%, 0.9) ridge;
+		}
+		
+		tr:hover:active {
+			box-shadow: 0 1px 1px hsla(211,79%,6%,.1) inset,
+						0 0 1px hsla(211,79%,6%,.2) inset;
+		}
+		
+		tr:focus,
+		tr[keepfocus],
+		tr[autofocus]{
+			outline: #00ff00 ridge;
+		}
+	</style>
+	</head>
+	<body>
+	<table align="center" frame="box" id="tableID" style="cursor: pointer;">
+		<thead> 			
+			<th>Text</th> 			
+			<th>MoreText</th> 			
+			<th>Lorem</th> 			
+			<th>Ipsum</th> 		
+		</thead>
+	</table>
+	<br />
+
+
+	<script type="text/javascript">
+		for (var i = 0; i < 4; i++) {
+			var table = document.getElementById('tableID');
+			
+			var tr = document.createElement('tr');
+			tr.onclick = function () {
+				console.log("Hello World");
+			};
+			
+			var td1 = document.createElement('td');
+			td1.innerText = "Text";
+			var td2 = document.createElement('td');
+			td2.innerText = "MoreText";
+			var td3 = document.createElement('td');
+			td3.innerText = "Lorem";
+			var td4 = document.createElement('td');
+			td4.innerText = "Ipsum";
+			
+			tr.appendChild(td1);
+			tr.appendChild(td2);
+			tr.appendChild(td3);
+			tr.appendChild(td4);
+			
+			table.appendChild(tr);
+		}
+	</script>
+	</body>
+	</html>

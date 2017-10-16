@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<title>Map</title>
+	<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDW0llaR4Qwya99h1H4TB0IZUuG00QOtXg&callback=initMap"async defer></script>
+	<style>
+		html, body{
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+		#map{
+			height: 100%;
+			margin: 0px auto;
+		}
+	</style>
+	<script type="text/javascript">
+		//---------------------GLOBAL VARIABLE------------------------//
+		var map;
+		var colorIndex = 0;//line's color
+		var colorArray = ['#FF0000', '#FF5511', '#00BBFF', '#0000FF', '#770077']
+		//---------------------GLOBAL VARIABLE------------------------//
+		
+		function initMap(){
+			var initCenter = new google.maps.LatLng(25.0380438, 121.4323365);//remove
+			var myOptions = {//map's argumernts
+				zoom: 13,
+				center: initCenter,//event ocurred site
+				mapTypeId: google.maps.MapTypeId.ROADMAP//map shows road
+			};
+			
+			map = new google.maps.Map(document.getElementById("map"), myOptions);//create map
+		}
+		
+		function addMarker(location){ // Add marker on map
+			var iconBase = 'src/marker/';
+			var marker = new google.maps.Marker({
+				position: location,
+				map: map,
+				icon: iconBase + 'doge.png'
+				//icon: 'src/marker/doge.png'
+			});
+		}
+		
+		function drawPath(pathRecord){
+			var uIDPath = new google.maps.Polyline({
+							path: pathRecord,
+							geodesic: true,
+							strokeColor: colorArray[colorIndex++ % 5],
+							strokeOpacity: 1.0,
+							strokeWeight: 5
+						});
+
+			uIDPath.setMap(map);
+		}
+		
+		function getLocation(){ // Post to Query Location Position
+			var uID = document.getElementById("id").value;
+			
+			//recieve markers' position from database and call function "addMarker()" to mark on map
+			$.ajax({type: "POST", 
+				url: "ajax/MapAJAX.php",
+				dataType: "json",
+				data: {uID: uID},
+				async: false,
+				success: function(location) { 
+					var pathRecord = new Array();
+					for(var i = 0; i < location.length; i++){
+						var marker = new google.maps.LatLng(location[i].latitude, location[i].longitude);
+						if(i == location.length-1 || i == 0)
+							addMarker(marker);
+						pathRecord.push(marker);
+					}
+					drawPath(pathRecord);
+				},
+				error: function(){
+					alert("AJAX Failed");
+				},
+			});	
+		}
+	</script>
+  </head>
+  <body onload="initMap()">
+  <script src="https://code.jquery.com/jquery-2.2.3.js"></script>
+	<form>
+		<input id="id" type="textbox" />
+		 <button type="button" onclick="getLocation()">Click Me!</button> 
+		<br/><br/>
+	</form>
+	<div id="map" style="width:1900px;height:900px;"/>
+  </body>
+</html>

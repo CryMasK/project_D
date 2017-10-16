@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+
+	$(document).ready(function(){
+		$("button").click(function(){
+			postFunction();		
+		});//#click
+	});//#ready
+	
+	function postFunction(){		
+		$.post("http://140.136.150.80/project_d/ajax/ReceiveMessage.php",
+		{
+			account: "GPSLiawDemo",
+		},
+		function(){});//#post
+	}
+	
+</script>
+</head>
+<body>
+
+<button>RceMsg</button>
+
+</body>
+</html>

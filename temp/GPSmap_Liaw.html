@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html>
+	<head>
+		<title>Map</title>
+		<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+		<script src="https://rawgithub.com/CryMasK/furry-robot/master/random-color.js">// dor random color for polyline</script>
+		<style>
+			html, body{
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+			}
+			#map{
+				height: 100%;
+				margin: 0px;
+			}
+		</style>
+	</head>
+	<body>
+		<script
+		  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRVE_uo1_J0B0B0HXfPT1bQvZ34EQZ_-w&libraries=geometry">
+		  // Cancel "async defer" & "callback" function 
+		</script>
+		<script src="js/jquery-3.1.1.js">// for query MySQL</script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js">// for initial seed to random</script>
+		
+		<!--for animating marker-->
+		<!-- jquery library and jquery.easing plugin are needed -->
+		<script src="js/jquery-3.1.1.min.js"></script>
+		<script src="js/jquery.easing.1.3.js"></script>
+		
+		<!-- we use markerAnimate to actually animate marker -->
+		<script src="js/markerAnimate.js"></script>
+		
+		<!-- SlidingMarker hides details from you - your markers are just animated automagically -->
+		<script src="js/SlidingMarker.min.js"></script>
+		<!--library import end-->
+		
+		<script type="text/javascript">
+			var map;
+			var markers = [], // 2div-Array of marker, markers[ times of query ][ slice of polyline]
+				lines = []; // Array of polyline
+			var queryTimes = -1; // query counter, use to Identify the id of marker, line, ... 
+			
+			function initMap(){
+				var initCenter = new google.maps.LatLng(25.0380438, 121.4323365);//remove
+				var myOptions = {//map's argumernts
+					zoom: 13,
+					center: initCenter,//event ocurred site
+					mapTypeId: google.maps.MapTypeId.ROADMAP//map shows road
+				};
+				
+				map = new google.maps.Map(document.getElementById("map"), myOptions);//create map
+			}
+			
+			google.maps.event.addDomListener(window, "load", initMap); // LOAD MAP(NOT instead of callback parameter) error in FireFox Add-On
+				
+			var iconBase = 'src/marker/';
+			var icons = {
+				start: {
+					icon: iconBase + 'doge.png'
+				},
+				footprint: {
+					icon: iconBase + 'footprint.png'
+				},
+				unseen: {
+					icon: iconBase + 'transparent.png'
+				}
+			};
+			
+			function addMarker(feature){ // Add marker on map
+				var marker = new google.maps.Marker({
+					position: feature.position,
+					map: map,
+					title: feature.date,
+					icon: icons[feature.type].icon
+				});
+
+				markers[queryTimes].push(marker);
+			}
+			
+			// Define the symbol, using one of the predefined paths ('CIRCLE')
+			// supplied by the Google Maps JavaScript API.
+			var lineSymbols = {
+				lightGreen: { // **中括弧(brackets)是陣列；大括弧(Braces)是指標
+					path: google.maps.SymbolPath.CIRCLE,
+					fillColor: '#FFFFFF',
+					fillOpacity: 1,
+					strokeColor: '#00FF00',
+					strokeWeight: 3,
+					scale: 5
+					
+				},
+				unseen: {
+					path: google.maps.SymbolPath.CIRCLE,
+					strokeOpacity: 0
+				}
+			};	
+			
+			function drawLine(symbolColor){	
+				// Random color of polyline
+				Math.seedrandom(queryTimes + 56);
+				
+				var r = Math.floor(Math.random() * 256);
+				var g = Math.floor(Math.random() * 256);
+				var b = Math.floor(Math.random() * 256);
+				var color = "rgb("+r+" ,"+g+","+ b+")"; 
+			
+				var line = new google.maps.Polyline({
+								icons: [{
+									icon: lineSymbols[symbolColor],
+									offset: '0%'
+								}],
+								strokeColor: color,
+								strokeWeight: 5,
+								map: map
+							});
+				
+				return line;
+			}
+			
+			// Use the DOM setInterval() function to change the offset of the symbol
+			// at fixed intervals.
+			function animateCircle(line, count, time) {
+				/*var count = 0;
+				
+				window.setTimeout(function() { // use to change line
+					var t = window.setInterval(function() {	// use to change symbol position*/		
+				window.setTimeout(function() {
+					/*count = (count + 1) % 200;*/
+
+					var icons = line.get('icons');
+					icons[0].offset = (count / 2) + '%';
+					if (count == 199){
+						icons[0].icon = lineSymbols['unseen'];
+						//window.clearInterval(t); // stop
+					}
+					else{
+						icons[0].icon = lineSymbols['lightGreen'];
+					}
+					line.set('icons', icons);
+						
+					/*if ( count == 199 ){ // because count % 200
+						window.clearInterval(t);
+					}
+				}, 30);*/
+				}, time);
+			}
+			
+			/*	///用不到///
+			function StepByStep_Anime(index, time){
+				setTimeout( function(){
+						markers[index-1].setVisible(false); // Hide last one marker
+						markers[index].setVisible(true); // Show the marker
+					}, time );
+			}
+			*/
+			
+			// Sets the map on all markers in the array.
+			function setMapOnAll(map) { 
+			//function setMapOnAll() { // 測試
+				for (var i = 1; i < markers.length; i++) {
+					markers[i].setMap(map);
+					//markers[i].setVisible(false); // 測試
+				}
+			}
+
+			function showAnime_onClick(){
+				/*setMapOnAll(null);
+			
+				for (var i=1; i<markers.length; i++){
+					StepByStep_Anime(i, 125 * i);
+				}*/
+				var count = 0,
+					time = 0;
+				for (var i=0; i<lines[queryTimes].length; i++){
+					while (true){					
+						count = (count + 1) % 200;
+						time+=25;
+						
+						animateCircle(lines[queryTimes][i], count, time); 
+						if (count == 199){ // count loop 0~199
+							time+=30; // 30+25ms between change line
+							break;
+						}
+					}
+				}
+			}
+			
+			/* 	///省略不用///
+			function stringToDate(string) {
+				var dateParts = string.split(/[- :]/); 
+				
+				var date = new Date( Date.UTC(dateParts[0], dateParts[1]-1, dateParts[2], dateParts[3], dateParts[4], dateParts[5]) );
+
+				return date;
+			}
+			*/
+			
+			function timeDifference(pre, post){
+				var pre = pre.split(/[- :.]/); // **Regular Expression 
+				var post = post.split(/[- :.]/); // **right to left, (so Variable = Parameter.split(/[- :]/))
+				
+				var preDate = new Date( Date.UTC(pre[0], pre[1]-1, pre[2], pre[3], pre[4], pre[5]) );
+				var postDate = new Date( Date.UTC(post[0], post[1]-1, post[2], post[3], post[4], post[5]) );
+				
+				return postDate - preDate;
+			}
+			
+			function getLocation(){ // Post to Query Location Position
+				var uID = document.getElementById("id").value;
+				
+				//recieve markers' position from database and call function "addMarker()" to mark on map
+				$.ajax({type: "POST", 
+					url: "ajax/LogMapAJAX.php",
+					dataType: "json",
+					data: {uID: uID},
+					async: false,
+					success: function(location) { 
+						queryTimes ++;
+						markers[queryTimes] = new Array(); // Creating a 2div-Array of marker, markers[ times of query ][ slice of polyline]
+						lines[queryTimes] = new Array();
+
+						var line = drawLine("lightGreen");
+						var path = line.getPath();
+						
+						lines[queryTimes].push(line); // store line
+
+						for(var i = 0; i < location.length; i++){
+							/*	/// when have many features, use Array feature ///
+								var feature = [
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'start'
+									}
+								];
+								addMarker(feature[0]);
+							*/
+							
+							if(i==0){
+								var feature = 
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'start',
+										date: location[i].date, // Warning !! Server data has error
+										id: queryTimes
+									};
+									
+								var infowindow = new google.maps.InfoWindow({
+									content: uID,
+									maxWidth: 200
+								});
+							}
+							else{
+								if ( (timeDifference(location[i-1].date, location[i].date) >  45000) && ( google.maps.geometry.spherical.computeDistanceBetween( new google.maps.LatLng(location[i-1].latitude, location[i-1].longitude), new google.maps.LatLng(location[i].latitude, location[i].longitude) ) > 300 ) ){ // Non-Recoding time over than 45s && move more than 300m, split the line
+									line = drawLine("unseen"); // split for creating a new line
+									path = line.getPath();
+									
+									lines[queryTimes].push(line);
+									
+									var feature =
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'footprint',
+										date: location[i].date, // Warning !!
+										id: queryTimes
+									};
+								}
+								else{
+									var feature =
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'unseen',
+										date: location[i].date // Warning !!
+									};
+								}
+							}
+							addMarker(feature);
+							path.push(feature.position);
+						}
+						infowindow.open(map, markers[queryTimes][0]); // add infowindow on the start marker
+						//setMapOnAll(null);
+					},
+					error: function(){
+						alert("AJAX Failed");
+					},
+				});	
+							
+					/*	/// ANOTHER VERSION ///
+						var xmlhttp = new XMLHttpRequest();
+						window.alert("1");
+						xmlhttp.onreadystatechange=function() {
+							if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+								var marker = JSON.parse(xmlhttp.responseText);
+								for(var i = 0; i < marker.length; i++){
+									var location = new google.maps.LatLng(marker[i].latitude, marker[i].longitude);
+									addMarker(location);
+								}
+
+							}
+						}
+						//-----------------------------------------------------------------//
+						xmlhttp.open("POST", "json_mysql.php?uID="+uID, true);
+						//-----------------------------------------------------------------//
+						xmlhttp.send();
+					*/
+			}
+		</script>
+		<input id="id" type="textbox" />
+		<button type="button" onclick="getLocation()">Click Me!</button> 
+		<button type="button" onclick="showAnime_onClick()">Anime</button> 
+		<div id="map"></div>
+	</body>
+</html>

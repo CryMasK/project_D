@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>GPS Log</title>
+		<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+		<script src="https://rawgithub.com/CryMasK/furry-robot/master/random-color.js">// dor random color for polyline</script>
+		<style>
+			html, body{
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+			}
+			#map{
+				height: 100%;
+				margin: 0px;
+			}
+		</style>
+	</head>
+	<body>
+		<script
+		  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDRVE_uo1_J0B0B0HXfPT1bQvZ34EQZ_-w&libraries=geometry">
+		  // Cancel "async defer" & "callback" function 
+		</script>
+		<script src="js/jquery-3.1.1.js">// for query MySQL</script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/seedrandom/2.4.0/seedrandom.min.js">// for initial seed to random</script>
+		
+		<!--for animating marker-->
+		<!-- jquery library and jquery.easing plugin are needed -->
+		<script src="js/jquery-3.1.1.min.js"></script>
+		<script src="js/jquery.easing.1.3.js"></script>
+		
+		<!-- we use markerAnimate to actually animate marker -->
+		<script src="js/markerAnimate.js"></script>
+		
+		<!-- SlidingMarker hides details from you - your markers are just animated automagically -->
+		<script src="js/SlidingMarker.min.js"></script>
+		<!--library import end-->
+		
+		<script type="text/javascript">
+			var map;
+			var markers = [], // 2div-Array of marker, markers[ times of query ][ slice of polyline]
+				lines = []; // Array of polyline
+			var queryTimes = -1; // query counter, use to Identify the id of marker, line, ... 
+			
+			function initMap(){
+				var initCenter = new google.maps.LatLng(25.0380438, 121.4323365);//remove
+				var myOptions = {//map's argumernts
+					zoom: 13,
+					center: initCenter,//event ocurred site
+					mapTypeId: google.maps.MapTypeId.ROADMAP//map shows road
+				};
+				
+				map = new google.maps.Map(document.getElementById("map"), myOptions);//create map
+			}
+			
+			google.maps.event.addDomListener(window, "load", initMap); // LOAD MAP(NOT instead of callback parameter) error in FireFox Add-On
+				
+			var iconBase = 'src/marker/';
+			var icons = {
+				start: {
+					icon: iconBase + 'doge.png'
+				},
+				footprint: {
+					icon: iconBase + 'footprint.png'
+				},
+				unseen: {
+					icon: iconBase + 'transparent.png'
+				}
+			};
+			
+			function addMarker(feature){ // Add marker on map
+				var marker = new google.maps.Marker({
+					position: feature.position,
+					map: map,
+					title: feature.date,
+					icon: icons[feature.type].icon
+				});
+				
+				if (feature.type == 'start'){ // add animate play function on 'start' marker
+					console.log("87");
+					marker.addListener('click', function(){
+						console.log("89");
+					});
+					
+					/*(function() { // closure
+							var lineID = queryTimes;
+							console.log("88");
+							return function(){
+								console.log("89");
+								showAnime_onClick(lineID);
+							}
+						})()
+					);*/
+				}
+				markers[queryTimes].push(marker);
+			}
+			
+
+			function timeDifference(pre, post){
+				var pre = pre.split(/[- :.]/); // **Regular Expression 
+				var post = post.split(/[- :.]/); // **right to left, (so Variable = Parameter.split(/[- :]/))
+				
+				var preDate = new Date( Date.UTC(pre[0], pre[1]-1, pre[2], pre[3], pre[4], pre[5]) );
+				var postDate = new Date( Date.UTC(post[0], post[1]-1, post[2], post[3], post[4], post[5]) );
+				
+				return postDate - preDate; // return ms
+			}
+			
+			function getLocation(){ // Post to Query Location Position
+				var uID = document.getElementById("id").value;
+				
+				//recieve markers' position from database and call function "addMarker()" to mark on map
+				$.ajax({type: "POST", 
+					url: "ajax/MapAJAX.php",
+					dataType: "json",
+					data: {uID: uID},
+					async: false,
+					success: function(location) { 
+						queryTimes ++;
+						markers[queryTimes] = new Array(); // Creating a 2div-Array of marker, markers[ times of query ][ slice of polyline]
+
+
+						for(var i = 0; i < location.length; i++){
+							/*	/// when have many features, use Array feature ///
+								var feature = [
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'start'
+									}
+								];
+								addMarker(feature[0]);
+							*/
+							
+							if(i==0){
+								var feature = 
+									{
+										position: new google.maps.LatLng(location[0].latitude, location[0].longitude),
+										type: 'start',
+										date: location[0].date, // Warning !! Server data has error
+										id: queryTimes
+									};
+									
+							}
+							else{
+								if ( (timeDifference(location[i-1].date, location[i].date) >  29000) && ( google.maps.geometry.spherical.computeDistanceBetween( new google.maps.LatLng(location[i-1].latitude, location[i-1].longitude), new google.maps.LatLng(location[i].latitude, location[i].longitude) ) > 300 ) ){ // Non-Recoding time over than 29s && move more than 300m, split the line
+								
+									
+									var feature =
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'footprint',
+										date: location[i].date, // Warning !!
+										id: queryTimes
+									};
+								}
+								else{
+									var feature =
+									{
+										position: new google.maps.LatLng(location[i].latitude, location[i].longitude),
+										type: 'footprint',
+										date: location[i].date // Warning !!
+									};
+								}
+							}
+							addMarker(feature);
+						}
+					},
+					error: function(){
+						alert("AJAX Failed");
+					},
+				});	
+			}
+		</script>
+		<input id="id" type="textbox" />
+		<button type="button" onclick="getLocation()">Click Me!</button> 
+		<div id="map"></div>
+	</body>
+</html>

@@ -1,0 +1,78 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+	<title>Map</title>
+	<meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDW0llaR4Qwya99h1H4TB0IZUuG00QOtXg&callback=initMap"async defer></script>
+	<style>
+		html, body{
+			height: 100%;
+			margin: 0;
+			padding: 0;
+		}
+		#map{
+			height: 100%;
+			margin: 0px auto;
+		}
+	</style>
+	<script type="text/javascript">
+		var map;
+		function initMap(){
+			var initCenter = new google.maps.LatLng(25.0380438, 121.4323365);//remove
+			var myOptions = {//map's argumernts
+				zoom: 13,
+				center: initCenter,//event ocurred site
+				mapTypeId: google.maps.MapTypeId.ROADMAP//map shows road
+			};
+			
+			map = new google.maps.Map(document.getElementById("map"), myOptions);//create map
+
+		}
+		
+		function addMarker(location){//adding marker on map
+			var marker = new google.maps.Marker({
+				position: location,
+				map: map
+			});
+		}
+		
+		function getLocation(){//which to search
+	
+			var uID = document.getElementById("id").value;
+				//adding marker on map
+				//recieve markers' position from database and call function "addMarker()" to mark on map
+				
+				var xmlhttp = new XMLHttpRequest();
+				window.alert("1");
+				xmlhttp.onreadystatechange=function() {
+					if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+						var marker = JSON.parse(xmlhttp.responseText);
+						for(var i = 0; i < marker.length; i++){
+							var location = new google.maps.LatLng(marker[i].latitude, marker[i].longitude);
+							addMarker(location);
+						}
+
+					}
+				}
+				//-----------------------------------------------------------------//
+				xmlhttp.open("POST", "json_mysql.php?uID="+uID, true);
+				//-----------------------------------------------------------------//
+				xmlhttp.send();
+
+		}
+
+		/*
+		
+		*/
+	</script>
+  </head>
+  <body onload="initMap()">
+  <script src="https://code.jquery.com/jquery-2.2.3.js"></script>
+	<form>
+		<input id="id" type="textbox" />
+		 <button type="button" onclick="getLocation()">Click Me!</button> 
+		<br/><br/>
+	</form>
+	<div id="map" style="width:1900px;height:900px;"/>
+  </body>
+</html>

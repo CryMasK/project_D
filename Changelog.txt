@@ -1,0 +1,268 @@
+*:已有功能 or 對目前功能進行改善	+:新增功能	~:未來要做的功能
+
+GPS Route:
+	*分割畫面、顯示地圖，自動縮放地圖大小 (auto-resize)
+	*js自動擴充表格、清除表格
+	*點擊新增目的地，算出導航距離、時間，排序(距離)
+
+
+GPS Log:
+	*輸入uID查詢過往路線記錄，畫出起點、中繼點，畫出路線polyLine，infoWindow顯示查詢的uID
+	*超過45秒 & 300m 沒有訊號，中斷polyLine
+	*點擊按鈕後，顯示路線動畫
+
+
+GPS App:
+	*利用網路、GPS，抓取經緯度座標
+	*利用http post傳送資料
+	
+
+========================================
+2016/09/22
+
+GPS Route:
+	*隱藏DirectionsRenderer導航結果marker (suppressMarkers: true)
+	*隱藏DirectionsRenderer導航結果polyLine (suppressPolylines: true)
+	*修正#rank-route排版padding為百分比%，而非相素px
+	*修正table排版 (style="table-layout: fixed; width: 90%;") 
+	*修正table 標題排版 (style="width: ~%;")
+
+	+新增rendererOptions控制導航顯示結果
+	+新增compareDistance和compareDuration兩種導航排序方式
+	+新增表格排序功能（距離、時間），且可點擊
+
+	(9/28完成) 限制要求導航速度 (限制click的速度)
+	(9/22完成) table 排序序號
+	(10/1完成) table onClick (http://stackoverflow.com/questions/21033368/javascript-onclick-event-html-table)
+	(9/22完成) table 預設大小
+	(9/22完成) table 文字對齊
+	(9/27完成) search box
+	~調整doge圖標大小
+	(10/1完成) 調整表格排序功能游標，限制表格排序功能無法在無內容時排序、點擊 (http://my-web-design.blogspot.tw/2009/06/javascript-style-css-properties-to.html)
+	~通訊功能
+
+
+GPS Log:
+	(10/22完成) uID查詢改為enter 輸入(listener)，而非按鈕
+	(10/1完成) 改變動畫為「點擊起始marker」開始
+	(10/1完成) 每一條線都要能有動畫 (start marker click event)
+	(10/22完成) 起始marker當滑鼠移動至上面時，跳動(動畫) 提示使用者可點擊
+	~doge圖標改為播放符號 (https://mapicons.mapsmarker.com/		https://sites.google.com/site/gmapsdevelopment/)
+	(10/1完成) 改變動畫為「動畫marker」，而非現在的polyLine動畫
+	(10/1完成) 配合「動畫marker」以infoWindow顯示時速
+	~點擊兩點，highlight指定(兩點中間) 的線段 (polyLine clickable  OR  marker click event)，並顯示速度 (https://jqueryui.com/datepicker/)
+	~jQuery 日期選取時間，highlight線段，顯示平均時速
+
+
+綜合:
+	~設計 nav bar (http://pydoing.blogspot.tw/2012/01/html-5-nav.html)
+
+
+========================================
+2016/09/27
+
+GPS Route:
+	*search box與地圖連線 (可利用search box來設定目的地)
+
+	~table顯示資料前呈現「Loading...」動畫 (其一選擇：https://jqueryui.com/progressbar/#indeterminate)(https://dotblogs.com.tw/joysdw12/archive/2012/12/13/85629.aspx)
+
+
+========================================
+2016/09/28
+
+GPS Route:
+	+新增searchBox places_changed 與 map click「request目的地導航（新增目的地）」的速度限制，避免Google API丟擲「Directions request failed due to OVER_QUERY_LIMIT」錯誤（clickEnable限制點擊設置目的地的速度；clickEnableTimeout設定「限制速度」）
+
+	~提示訊息：Map提示 跟 限制訊息 (https://jqueryui.com/tooltip/#default  http://www.w3schools.com/bootstrap/bootstrap_tooltip.asp  http://stackoverflow.com/questions/18812982/showing-a-hint-message-upon-hovering)
+	
+
+
+GPS Log:
+	(10/22放棄) input提示 (http://stackoverflow.com/questions/108207/how-do-i-make-an-html-text-box-show-a-hint-when-empty)
+
+
+========================================
+2016/10/01
+
+GPS Route:
+	*改寫generate table的邏輯，由innerHTML完全改為 standard DOM 的函式
+	*改寫請求route的邏輯（導航一次過後，就會儲存在marker的directionsDisplay欄位），避免多次request API而丟擲錯誤
+	*修正generate table時，onclick 的 closure問題
+
+	+新增table點擊事件，點擊後顯示導航結果
+
+	(10/23完成) 需要一個按鈕function來清除導航結果，回復原本的地圖視野
+
+
+GPS Log:
+	*改寫動畫邏輯，全部改為利用 SlidingMarker 製作動畫
+
+	+新增click licstener於起始marker，現在播放動畫改為點擊起始marker
+	+新增InfoWindow 附著於每個動畫的 SlidingMarker上，顯示兩點時速
+
+	~優化顯示時速的架構、變數傳遞，以及視覺效果
+	~disable click播放當動畫播放時
+
+
+綜合:
+	*更新jQuery Library，大部分引用的library改為本地化 (js資料夾)
+
+
+========================================
+2016/10/09
+
+GPS Route:
+	*修改table的background-color: rgb(245, 250, 240);
+
+
+GPS Log:
+	*改變unseen圖標大小為16x16，避免遮蔽起始圖標點擊
+
+
+GPS App:
+	*改寫要求權限邏輯，使應用程式能符合Android 6 (MM)的架構
+
+	+當傳送座標時，set傳送按鈕Clickable(false)，避免重複傳送造成資料異常
+	+新增Regular Expression (^[A-Za-z0-9_-]+$)，來判斷uID輸入是否合法，避免SQL Injection
+	+新增用戶狀態switch，新增switch OnCheckedChangeListener讀取資料，並且回傳資料多一欄「狀態」
+
+
+綜合:
+	+新增資料庫欄位「state」，記錄用戶狀態
+	+新增ereg()判斷式於posttest.php與MapAJAX.php，檢測是否為合法字元（現在uID只能為[a-zA-Z0-9_-]）
+
+
+========================================
+2016/10/15
+
+GPS Route:
+	*整理新增目的地的程式碼，改為由 setDestination(position) 控制
+
+	+新增scanMap(nowID)函式，每3秒會不斷去掃資料庫是否有新資料，並且移動 or 標記Marker在地圖上
+	+當scanMap()掃到新用戶時，在用戶Marker的後面會生成一個動畫Marker (blinkingMarker)，用於提醒有新用戶標記
+
+
+GPS App:
+	(10/18完成) 解決onResume後，原本沒在傳送的狀態，會回復成正在傳送的狀態
+
+
+綜合:
+	+新增ajax/RouteMapAJAX.php，用於比較post傳入的id是否最新（掃描新資料）。最新的話就不回傳資料，return (int)false；不是的話，將return所有新資料
+	+新增ajax/FetchMaxID.php，在頁面載入時，查詢目前MAX(id)，initial傳入scanMap()的參數
+
+
+========================================
+2016/10/18
+
+GPS Route:
+	+新增一個動畫Marker (blinkingMarker)，當user狀態改變時，生成在movingUser下面(zIndex)
+
+
+GPS App:
+	*解決onResume，會將原本沒在傳送的狀態，回復成正在傳送（在stopBtn_onClick()裡補上getService = false; // 定位服務flipflop）；一併修復onResume後，會致能已鎖定的Button跟EditText
+
+
+綜合:
+	*MySQL state欄位改為int型態 (0: 正常；1: 忙碌)，App、PHP、js的code也一併修改
+
+
+========================================
+2016/10/21
+
+GPS Route:
+	*每scanMap()一次，也會動態改變導航結果
+
+	+當一段時間沒有接收到某user的訊號，則該movingUser「黃色」，並開始閃爍（動畫）
+
+	(10/22完成) 解決scanMap()請求導航與用戶請求導航間，頻率相衝的問題
+
+
+GPS Log:
+	*現在unseen圖標(用於顯示polyLine線上某點時間)的 zIndex 設為-1，不會再擋到start圖標點擊
+
+
+綜合:
+	(10/22完成) 改變map背景顏色，使marker更顯眼
+
+
+========================================
+2016/10/22&23
+
+GPS Route:
+	*解決scanMap()請求導航與用戶請求導航間，頻率相衝的問題
+
+	+myOptions地圖選項中，新增styles，改變map樣式，使marker更顯眼（https://mapstyle.withgoogle.com/）
+	+現在導航的table在滑鼠移動、點擊時，都會有特效提醒使用者
+	+新增cleanMap()的貓拳(cat-paw)動畫，用於整理地圖畫面
+
+	(10/23完成) 點擊table，請求導航時，改變點擊那欄的outline。focus其他部位時，則取消outline；滑過時則為突起的outline（http://www.w3school.com.cn/cssref/pr_outline.asp）
+
+
+GPS Log:
+	*確認輸入框value是否為empty
+
+	+新增「Enter」的listener於查詢用的InputText
+	+完全修改uID-input所有的容器物件，以及樣式（參考資料：http://mozilla.org/MPL/2.0/		火狐瀏覽器的default頁面）
+	+在起始marker上，新增滑鼠滑過會跳躍的動畫，以及隨機設置一段時間後會跳躍的動畫，用於提醒使用者點擊
+
+
+========================================
+2016/11/02
+
+GPS Route:
+	*cleanMap()的貓拳動畫現在更加平滑，且會正確清除所有的值
+
+	+新增icon-sidenav，作為功能選單
+
+	~點擊icon-sidenav後改變背景色，而非CSS:focus （http://stackoverflow.com/questions/4588759/how-do-you-set-a-javascript-onclick-event-to-a-class-with-css）
+
+
+GPS Log:
+	+新增icon-sidenav，作為功能選單
+
+	~點擊icon-sidenav後改變背景色，而非CSS:focus （http://stackoverflow.com/questions/4588759/how-do-you-set-a-javascript-onclick-event-to-a-class-with-css）
+
+
+GPS App:
+	*修正請求權限後會crash的問題 (在請求權限畫面結束後，onResume執行，如之前沒Initial過定位服務，得先locationServiceInitial())
+	*修正在Android版本6以下，傳送座標忘記鎖定輸入、按鈕的問題
+	
+	+現在專案會自動同步到github: https://github.com/CryMasK/GPStest
+
+	~專題電腦更新後，造成port繁忙，無法正常傳輸的問題（recvfrom failed: ECONNRESET (Connection reset by peer)）
+
+
+========================================
+2016/11/08
+
+GPS Log:
+	*解決排版、亂碼...等問題
+
+
+========================================
+2016/11/11
+
+GPS Route:
+	*scan回來的資料現在從back 開始擺放，新增一個scanResult陣列，用來儲存、判斷該筆用戶/資料在這次scan是否用過（是：代表現在這筆比較舊）
+
+
+========================================
+2016/11/12
+
+GPS Route:
+	+新增傳送訊息功能，以及傳送訊息相關的物件和函式。有登入會員的資料，會多一個通訊圖標，可傳送訊息（app端讀取後才可傳下一筆）
+
+
+GPS App:
+	+新增一個登入的Activity，以及登入相關的函式
+
+
+========================================
+2016/11/17
+
+GPS App:
+	*修正changeState動畫錯誤的問題
+
+
+GPS App:
+	+新增讀取訊息的功能，以及訊息圖標跟訊息Badger（有登入的話，ReceiveMsg在每次傳送時檢查是否有新訊息，有新訊息且成功獲取，則再呼叫MarkSeen將資料庫裡的這筆訊息標示為已讀）

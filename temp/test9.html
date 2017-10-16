@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+  <script src="js/jquery-3.1.1.min.js">// for query MySQL</script>
+		
+		<!--beautiful button -->
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+		<!--link rel="stylesheet" href="/resources/demos/style.css"-->
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+		<!--animating marker library-->
+		<!-- jquery library and jquery.easing plugin are needed -->
+		<!--script src="js/jquery-3.1.1.min.js"></script-->
+		<script src="js/jquery.easing.1.3.js"></script>
+		
+		<!-- we use markerAnimate to actually animate marker -->
+		<script src="js/markerAnimate.js"></script>
+		
+		<!-- SlidingMarker hides details from you - your markers are just animated automagically -->
+		<script src="js/SlidingMarker.min.js"></script>
+		<!--library import end-->
+
+  <script>
+  $(function() {
+    $( ".cbutton" )
+      .button();
+	  
+				
+				
+  });
+  </script>
+</head>
+<body>
+ 
+
+<div id="abc">
+<button onClick="f()">jkjkaksdajlsd</button>
+</div>
+ <script type="text/javascript">
+ function f(){
+  var cancelBtn = document.createElement('button');
+				cancelBtn.className = "cbutton";
+				cancelBtn.innerText = "¨ú®ø";
+								$( ".cbutton" ).button();
+				
+				var routeContent = document.getElementById("abc");
+				routeContent.appendChild(cancelBtn);
+ }
+ 
+
+ </script>
+ 
+ 
+</body>
+</html>

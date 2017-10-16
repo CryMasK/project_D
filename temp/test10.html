@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <script src="js/jquery-3.1.1.min.js">// for query MySQL</script>
+		
+		<!--beautiful button -->
+		<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+		<!--link rel="stylesheet" href="/resources/demos/style.css"-->
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+
+  <script>
+  $(function() {
+    $( ".cbutton" )
+      .button();
+	  
+				
+				
+  });
+  </script>
+</head>
+<body>
+ 
+
+<div id="abc">
+<button onClick="f()">jkjkaksdajlsd</button>
+</div>
+ <script type="text/javascript">
+ var isMsgBoxOpen = false;
+ 
+ function f(){
+	if (isMsgBoxOpen){ // 假如已經有msgBox打開的話
+					$('.message-box').remove(); // close old msgBox
+				}
+			
+				var msgBoxInput = document.createElement('input');
+				msgBoxInput.type = "text";
+				msgBoxInput.className = "message-box-input";
+				
+				var cancelBtn = document.createElement('button');
+				cancelBtn.className = "cancel-button";
+				cancelBtn.innerText = "取消";
+				cancelBtn.onclick = function(){
+					$('.message-box').remove(); // close msgBox
+				};
+				
+				var sendMsgBtn = document.createElement('button');
+				sendMsgBtn.className = "send-message-button";
+				sendMsgBtn.innerText = "傳送";
+				
+				var msgBox = document.createElement('div');
+				msgBox.className =  "message-box";
+				msgBox.style.top = (320).toString() + "px"; // offset y+20
+				msgBox.style.left = (530).toString() + "px"; // offset x-230
+				msgBox.appendChild(msgBoxInput);
+				msgBox.appendChild(cancelBtn);
+				msgBox.appendChild(sendMsgBtn);
+				
+				var routeContent = document.getElementById("abc");
+				routeContent.appendChild(msgBox);
+				$( ".cancel-button" ).button();
+				$( ".send-message-button" ).button();
+				
+				isMsgBoxOpen = true;
+ }
+ 
+
+
+ </script>
+ 
+ 
+</body>
+</html>

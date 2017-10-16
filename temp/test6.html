@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="initial-scale=1.0" charset="utf-8">
+    </head>
+    <body>
+        <script type="text/javascript">
+            for (var i=0; i<4; i++){
+                doSomething(i);
+            }
+
+            function doSomething(id){
+                var count = 100;
+
+                var IntervalID = window.setInterval((function(){ // closure
+                    var timeoutID = IntervalID; // temp
+                    var countTemp = count; // temp
+					console.log(id + " - " + IntervalID);
+
+                    return function(){
+                        countTemp --;
+                        console.log(id + " " + countTemp);
+
+                        // do something here
+
+                        if ( countTemp == 0 ){
+							console.log(id + " - " + IntervalID);
+                            clearInterval(IntervalID); // stop the execution
+                            console.log(id + " stop");
+                        }
+                    }
+                })(), 20);
+            }
+        </script>
+    </body>
+</html>  
